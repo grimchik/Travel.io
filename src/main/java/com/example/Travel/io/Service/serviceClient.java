@@ -1,34 +1,26 @@
 package com.example.Travel.io.Service;
-
 import com.example.Travel.io.Model.*;
-
+import com.example.Travel.io.repositories.ClientRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+@Service
+@RequiredArgsConstructor
+@Slf4j
 public class serviceClient {
-    private Client client;
-    private long id = 0;
-    public void changeId()
-    {
-        this.client.setId(id);
-        id++;
+    private final ClientRepository clientRepository;
+    private ArrayList<Client> clients;
+    public ArrayList<Client> getClients() {
+        return clients;
     }
-    serviceClient(Client client)
-    {
-        this.client=client;
+    public void saveClient(Client client) {
+        clientRepository.save(client);
     }
-    public void addTrip(Trip trip)
-    {
-        this.client.getTripArrayList().add(trip);
+    public Client getClient(Long id) {
+        return clientRepository.findById(id).orElse(null);
     }
-    public void deleteTrip(Trip trip)
-    {
-        if (!this.client.getTripArrayList().isEmpty()) {
-            this.client.getTripArrayList().remove(trip);
-        }
-    }
-    public void deleteAllTripsForClient()
-    {
-        for (Trip elem:
-             this.client.getTripArrayList()) {
-            this.client.getTripArrayList().remove(elem);
-        }
+    public void deleteClient(Long id) {
+        //clients.removeIf(client -> client.getidClient() == id);
     }
 }

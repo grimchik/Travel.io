@@ -1,28 +1,35 @@
 package com.example.Travel.io.Model;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.ForeignKey;
+import lombok.*;
+import lombok.Setter;
+import lombok.Getter;
 
-import java.util.ArrayList;
-import java.util.Objects;
-
+@Entity
+@Table(name = "Trip")
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Trip {
-    private ArrayList<SubTrip> trip = new ArrayList<>();
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "idTrip")
+    @Getter
+    @Setter
+    private Long idTrip;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Trip trip1 = (Trip) o;
-        return Objects.equals(trip, trip1.trip);
-    }
+    @ManyToOne
+    @JoinColumn(name = "idClient_TRIPS", referencedColumnName = "idClient", foreignKey = @ForeignKey(name = "idClient_TRIPS"))
+    @Getter
+    @Setter
+    private Client client;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(trip);
-    }
-    public ArrayList<SubTrip> getTrip() {
-        return trip;
-    }
-    public void setTrip(ArrayList<SubTrip> trip) {
-        this.trip = trip;
-    }
 }
