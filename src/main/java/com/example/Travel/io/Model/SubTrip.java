@@ -1,46 +1,38 @@
 package com.example.Travel.io.Model;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import javax.persistence.*;
 import lombok.*;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.Setter;
 import lombok.Getter;
 @Entity
-@Table(name = "subTrip")
-@Data
+@Table(name = "sub_trip")
 @AllArgsConstructor
 @NoArgsConstructor
 public class SubTrip {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
+    @Column(name = "idsubTrip")
     @Getter
     @Setter
-    @Column (name = "idsubTrip")
-    private long idSubTrip;
+    private int idSubTrip;
 
+    @ManyToOne
+    @JoinColumn(name = "trip_id", nullable = false)
     @Getter
     @Setter
-    @Column (name = "trip_id")
-    private long trip_id;
+    private Trip trip;
 
-
+    @Column(name = "pointA", nullable = false)
     @Getter
     @Setter
-    @Column (name = "pointA")
     private String pointA;
 
+    @Column(name = "pointB", nullable = false)
     @Getter
     @Setter
-    @Column (name = "pointB")
     private String pointB;
 
+    @Column(name = "transport_type", nullable = false)
     @Getter
     @Setter
-    @Column (name = "transport_type")
-    private String transport_type;
+    private String transportType;
 }
