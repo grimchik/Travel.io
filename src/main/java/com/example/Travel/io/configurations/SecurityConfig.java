@@ -2,32 +2,38 @@ package com.example.Travel.io.configurations;
 
 import com.example.Travel.io.Service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 @RequiredArgsConstructor
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
+    @Autowired
     private final CustomUserDetailsService customUserDetailsService;
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-       auth.userDetailsService(customUserDetailsService)
-               .passwordEncoder(passwordEncoder());
+        auth.userDetailsService(customUserDetailsService)
+                .passwordEncoder(passwordEncoder());
+    }
+    @Bean
+    @Override
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/**","/login","/tryregistration","/registration")
-                .permitAll()
                 .antMatchers("/hello").authenticated()
+                .antMatchers("/**","/login**","/try-login**","/try-registration**","/registration**").permitAll()
                 .and()
                 .formLogin()
                 .loginPage("/login")
@@ -35,12 +41,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .and()
                 .logout()
                 .permitAll();
-
     }
     @Bean
     public PasswordEncoder passwordEncoder()
     {
         return new BCryptPasswordEncoder(8);
     }
-
 }

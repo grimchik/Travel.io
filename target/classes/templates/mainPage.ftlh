@@ -72,7 +72,7 @@
 </head>
 <body>
 <div class="login-box">
-    <form action="/login" method="post">
+    <form action="/login" method="get">
         <button class="custom-button" type="submit">
             <span></span>
             <span></span>
@@ -81,7 +81,7 @@
             Log In
         </button>
     </form>
-    <form action="/registration" method="post">
+    <form action="/registration" method="get">
         <button class="custom-button" type="submit">
             <span></span>
             <span></span>
@@ -93,7 +93,6 @@
 </div>
 </body>
 </html>
-
 <!--
 <!DOCTYPE html>
 <!DOCTYPE html>

@@ -38,8 +38,9 @@ public class serviceClient
         client.setActive(true);
         client.setPassword(passwordEncoder.encode(client.getPassword()));
         client.getRoles().add(Role.ROLE_USER);
-        clientRepository.save(client) ;
-        return true;
+        if (client.getPassword().equals("") ||client.getMail().equals("") || client.getPhoneNumber().equals("") || client.getLogin().equals(""))
+        return false;
+        else {clientRepository.save(client) ; return true;}
     }
     public List<Client> getAllClients()
     {

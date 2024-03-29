@@ -230,7 +230,7 @@
             <label for="password">Password:</label>
         </div>
         <div class="user-box">
-            <input type="repeat_password" id="repeat_password" name="repeat_password">
+            <input type="password" id="repeat_password" name="repeat_password">
             <label for="repeat_password">Repeat Password:</label>
         </div>
         <div class="user-box">
