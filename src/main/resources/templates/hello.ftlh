@@ -43,7 +43,6 @@
     });
 
     map.addControl(new mapboxgl.NavigationControl());
-
     var marker = new mapboxgl.Marker({ color: 'red' })
         .setLngLat([longitude, latitude])
         .addTo(map);

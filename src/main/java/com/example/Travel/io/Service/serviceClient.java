@@ -10,11 +10,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 public class serviceClient
 {
+    private static String PASSWORD_PATTERN = "(?=.*[0-9])(?=.*[!@#$%^&*])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z!@#$%^&*]{6,100}";
+    private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,150})$";
     private final ClientRepository clientRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -59,4 +63,28 @@ public class serviceClient
     public void deleteClient(Long id) {
         //clients.removeIf(client -> client.getidClient() == id);
     }
+    public boolean isValidEmail(String email){
+        return (validateEmail(email));
+    }
+    private boolean validateEmail(String email) {
+        Pattern pattern = Pattern.compile(EMAIL_PATTERN);
+        Matcher matcher = pattern.matcher(email);
+        return matcher.matches();
+    }
+    public boolean isValidPassword(String password){
+        return validatePassword(password);
+    }
+    private boolean validatePassword(String password) {
+        Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
+        Matcher matcher = pattern.matcher(password);
+        return matcher.matches();
+    }
+   /* public boolean isValidPhone(String phone){
+        return (validateEmail(phone));
+    }
+    private boolean validatePhone(String phone) {
+        Pattern pattern = Pattern.compile(PHONE_PATTERN);
+        Matcher matcher = pattern.matcher(phone);
+        return matcher.matches();
+    }*/
 }

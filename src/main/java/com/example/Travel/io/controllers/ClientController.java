@@ -94,7 +94,7 @@ public class ClientController {
                                @RequestParam String phone,
                                Model model)
     {
-        if (repeat_password.equals(password)) {
+        if (repeat_password.equals(password)&& serviceClient.isValidPassword(password) && serviceClient.isValidEmail(email)) {
             Client client = new Client(0, login, password, email, phone, true);
             System.out.println(client.getPassword());
             if (!serviceClient.createClient(client)) {
