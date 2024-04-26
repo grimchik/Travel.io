@@ -31,10 +31,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.text.AttributedString;
+import java.util.Base64;
 
 @Controller
 @RequiredArgsConstructor
 public class ClientController {
+    private static Client client;
+    private static String latitude;
+    private static String longitude;
+    private static String base64Image;
     private final GeoIPService geoIPService;
     private final HttpServletRequest request;
     private final TokenStorage tokenStorage;
@@ -50,6 +55,14 @@ public class ClientController {
     @PreAuthorize("isAuthenticated()")
     public String hello(Model model)
     {
+        int idValue = client.getIdClient();
+        Integer id = Integer.valueOf(idValue);
+        var image = serviceClient.findImage(id);
+        if (image != null) {
+            byte[] imageData = image.getImage();
+            base64Image = Base64.getEncoder().encodeToString(imageData);
+            model.addAttribute("base64Image", base64Image);
+        }
         String ipAddress ="";
         String urlString = "http://checkip.amazonaws.com/";
         try {
@@ -64,14 +77,13 @@ public class ClientController {
         }
         try {
             GeoIP location = geoIPService.getLocation(ipAddress);
-            var longitude = location.getLongitude();
-            var latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            latitude = location.getLatitude();
             model.addAttribute("longitude", longitude );
             model.addAttribute("latitude", latitude);
         } catch (IOException | GeoIp2Exception e) {
             e.printStackTrace();
         }
-
         return "hello";
     }
 
@@ -86,23 +98,42 @@ public class ClientController {
         return "registration";
     }
 
-   @PostMapping("/tryregistration")
+    @PostMapping("/tryregistration")
     public String createClient(@RequestParam String login,
                                @RequestParam String password,
                                @RequestParam String repeat_password,
                                @RequestParam String email,
                                @RequestParam String phone,
-                               Model model)
-    {
+                               Model model) throws IOException {
         if (repeat_password.equals(password)&& serviceClient.isValidPassword(password) && serviceClient.isValidEmail(email)) {
             Client client = new Client(0, login, password, email, phone, true);
+            client.setDefaultAvatar();
             System.out.println(client.getPassword());
             if (!serviceClient.createClient(client)) {
                 model.addAttribute("errorMessage", "User with this login are exist!");
                 return "registration";
             }
+            return "redirect:/login";
         }
-        return "redirect:/login";
+        System.out.println(serviceClient.isValidPassword(password) && serviceClient.isValidEmail(email));
+        return "registration";
+    }
+    @GetMapping("/newtravel")
+    @PreAuthorize("isAuthenticated()")
+    public String newTravel(Model model) {
+        model.addAttribute("longitude", longitude );
+        model.addAttribute("latitude", latitude);
+        String brestLongitude="23.7341";
+        String brestLatitude="52.0976";
+        model.addAttribute("brestLongitude", brestLongitude);
+        model.addAttribute("brestLatitude", brestLatitude);
+        return "newtravel";
+    }
+    @GetMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public String profile(Model model) {
+        model.addAttribute("base64Image", base64Image);
+        return "profile";
     }
     @PostMapping("/try-login")
     public String trylogin(@RequestParam String username, @RequestParam String password, Model model, RedirectAttributes redirectAttributes) {
@@ -110,12 +141,8 @@ public class ClientController {
             Authentication authentication =authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(username, password)
             );
-            UserDetails userDetails = serviceClient.getClientByLogin(username);
-            String token = jwtUtil.generateToken(userDetails);
-            tokenStorage.setToken(token);
+            client = serviceClient.getClientByLogin(username);
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            //redirectAttributes.addAttribute("token", token);
-
             return "redirect:/hello";
         } catch (AuthenticationException e) {
             model.addAttribute("errorMessage", "Invalid credentials. Please try again.");

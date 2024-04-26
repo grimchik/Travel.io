@@ -262,8 +262,8 @@
 <body>
 <h2>Registration</h2>
 <form action="/registration" method="post">
-    <label for="login">Login:</label><br>
-    <input type="text" id="login" name="login"><br>
+    <label for="login.ftlh">Login:</label><br>
+    <input type="text" id="login.ftlh" name="login.ftlh"><br>
     <label for="password">Password:</label><br>
     <input type="password" id="password" name="password"><br><br>
     <label for="repeat_password">Repeat Password:</label><br>

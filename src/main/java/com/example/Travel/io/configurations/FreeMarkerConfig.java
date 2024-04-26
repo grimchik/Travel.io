@@ -16,7 +16,7 @@ public class FreeMarkerConfig {
     @Bean
     public FreeMarkerViewResolver freeMarkerViewResolver() {
         FreeMarkerViewResolver resolver = new FreeMarkerViewResolver();
-        resolver.setPrefix("");
+        resolver.setPrefix("/WEB-INF/views/");
         resolver.setSuffix(".ftlh");
         resolver.setContentType("text/html;charset=UTF-8");
         return resolver;

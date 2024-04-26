@@ -220,7 +220,7 @@
 <html>
 <div class="login-box">
     <p>Login</p>
-    <form action="/try-login" method="post" >
+    <form action="/try-login" method="post">
         <div class="user-box">
             <input type="text" id="username" name="username">
             <label for="username">Login:</label>

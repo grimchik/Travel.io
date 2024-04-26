@@ -1,19 +1,20 @@
 package com.example.Travel.io.Model;
 import javax.persistence.*;
 import lombok.*;
+import org.springframework.mock.web.MockMultipartFile;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-
+import org.springframework.web.multipart.MultipartFile;
 import com.example.Travel.io.Model.emuns.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import javax.persistence.*;
-
+import org.springframework.web.multipart.MultipartFile;
 import static com.example.Travel.io.Model.emuns.Role.ROLE_USER;
-
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
@@ -65,7 +66,9 @@ public class Client  implements UserDetails {
     @Getter
     @Setter
     private Set<Role> roles = new HashSet<>();
-
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "client")
+    private Image image;
+    private Long imageId;
     public void setActive(boolean active) {
         this.active = active;
     }
@@ -87,7 +90,24 @@ public class Client  implements UserDetails {
     {
         dateOfCreated=LocalDateTime.now();
     }
-
+    public MultipartFile loadFileAsMultipartFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        FileInputStream input = new FileInputStream(file);
+        MultipartFile multipartFile = new MockMultipartFile("file",
+                file.getName(), "image/png", input);
+        return multipartFile;
+    }
+    public void setDefaultAvatar() throws IOException
+    {
+        var avatar=loadFileAsMultipartFile("C:\\Travel.io\\Travel.io\\src\\main\\resources\\static\\Avatar.png");
+        this.image=new Image();
+        this.image.setName(avatar.getName());
+        this.image.setOriginalFileName(avatar.getOriginalFilename());
+        this.image.setContentType(avatar.getContentType());
+        this.image.setSize(avatar.getSize());
+        this.image.setImage(avatar.getBytes());
+        this.image.setClient(this);
+    }
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return roles;

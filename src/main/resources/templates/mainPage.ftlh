@@ -97,7 +97,7 @@
 <!DOCTYPE html>
 <!DOCTYPE html>
 <style>
-    .login-box {
+    .login.ftlh-box {
      position: absolute;
      top: 50%;
      left: 50%;
@@ -111,7 +111,7 @@
      border-radius: 10px;
    }
 
-   .login-box p:first-child {
+   .login.ftlh-box p:first-child {
      margin: 0 0 30px;
      padding: 0;
      color: #fff;
@@ -121,11 +121,11 @@
      letter-spacing: 1px;
    }
 
-   .login-box .user-box {
+   .login.ftlh-box .user-box {
      position: relative;
    }
 
-   .login-box .user-box input {
+   .login.ftlh-box .user-box input {
      width: 100%;
      padding: 10px 0;
      font-size: 16px;
@@ -137,7 +137,7 @@
      background: transparent;
    }
 
-   .login-box .user-box label {
+   .login.ftlh-box .user-box label {
      position: absolute;
      top: 0;
      left: 0;
@@ -148,15 +148,15 @@
      transition: .5s;
    }
 
-   .login-box .user-box input:focus ~ label,
-   .login-box .user-box input:valid ~ label {
+   .login.ftlh-box .user-box input:focus ~ label,
+   .login.ftlh-box .user-box input:valid ~ label {
      top: -20px;
      left: 0;
      color: #fff;
      font-size: 12px;
    }
 
-   .login-box form a {
+   .login.ftlh-box form a {
      position: relative;
      display: inline-block;
      padding: 10px 20px;
@@ -171,18 +171,18 @@
      letter-spacing: 3px
    }
 
-   .login-box a:hover {
+   .login.ftlh-box a:hover {
      background: #fff;
      color: #272727;
      border-radius: 5px;
    }
 
-   .login-box a span {
+   .login.ftlh-box a span {
      position: absolute;
      display: block;
    }
 
-   .login-box a span:nth-child(1) {
+   .login.ftlh-box a span:nth-child(1) {
      top: 0;
      left: -100%;
      width: 100%;
@@ -201,7 +201,7 @@
      }
    }
 
-   .login-box a span:nth-child(2) {
+   .login.ftlh-box a span:nth-child(2) {
      top: -100%;
      right: 0;
      width: 2px;
@@ -221,7 +221,7 @@
      }
    }
 
-   .login-box a span:nth-child(3) {
+   .login.ftlh-box a span:nth-child(3) {
      bottom: 0;
      right: -100%;
      width: 100%;
@@ -241,7 +241,7 @@
      }
    }
 
-   .login-box a span:nth-child(4) {
+   .login.ftlh-box a span:nth-child(4) {
      bottom: -100%;
      left: 0;
      width: 2px;
@@ -261,17 +261,17 @@
      }
    }
 
-   .login-box p:last-child {
+   .login.ftlh-box p:last-child {
      color: #aaa;
      font-size: 14px;
    }
 
-   .login-box a.a2 {
+   .login.ftlh-box a.a2 {
      color: #fff;
      text-decoration: none;
    }
 
-   .login-box a.a2:hover {
+   .login.ftlh-box a.a2:hover {
      background: transparent;
      color: #aaa;
      border-radius: 5px;
@@ -320,8 +320,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WELCOME</title>
 </head>
-<div class="login-box">
-<form action="/login" method="post">
+<div class="login.ftlh-box">
+<form action="/login.ftlh" method="post">
     <button class="custom-button" type="submit">
     <span></span>
     <span></span>
