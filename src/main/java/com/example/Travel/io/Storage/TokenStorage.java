@@ -1,6 +1,5 @@
 package com.example.Travel.io.Storage;
 
-import com.example.Travel.io.token.JwtUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;

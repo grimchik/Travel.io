@@ -73,9 +73,7 @@
 <div id="map"></div>
 <div class="button-container">
     <button id="addMarkerButton" class="button">Добавить маркер</button>
-</div>
-<div class="button-container">
-    <button id="buildRouteButton" >Построить маршрут</button>
+    <button id="buildRouteButton" class="button">Построить маршрут</button>
 </div>
 <script>
     let markersArray = [];
@@ -146,48 +144,54 @@
         return;
     }
 
-    for (let i = 0; i < markersArray.length - 1; i++) {
-        const query = await fetch(
-            'https://api.mapbox.com/directions/v5/mapbox/driving/' +
-            markersArray[i].lng + ',' + markersArray[i].lat + ';' +
-            markersArray[i + 1].lng + ',' + markersArray[i + 1].lat +
-            '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken,
-            { method: 'GET' }
-        );
-        const json = await query.json();
-        const data = json.routes[0];
-        const route = data.geometry.coordinates;
-        const geojson = {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-                type: 'LineString',
-                coordinates: route
-            }
-        };
-        if (map.getSource('route' + i)) {
-            map.getSource('route' + i).setData(geojson);
-        } else {
-            map.addLayer({
-                id: 'route' + i,
-                type: 'line',
-                source: {
-                    type: 'geojson',
-                    data: geojson
-                },
-                layout: {
-                    'line-join': 'round',
-                    'line-cap': 'round'
-                },
-                paint: {
-                    'line-color': '#3887be',
-                    'line-width': 5,
-                    'line-opacity': 0.75
+    try {
+        for (let i = 0; i < markersArray.length - 1; i++) {
+            const query = await fetch(
+                'https://api.mapbox.com/directions/v5/mapbox/driving/' +
+                markersArray[i].lng + ',' + markersArray[i].lat + ';' +
+                markersArray[i + 1].lng + ',' + markersArray[i + 1].lat +
+                '?steps=true&geometries=geojson&access_token=' + mapboxgl.accessToken,
+                { method: 'GET' }
+            );
+            const json = await query.json();
+            const data = json.routes[0];
+            const route = data.geometry.coordinates;
+            const geojson = {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                    type: 'LineString',
+                    coordinates: route
                 }
-            });
+            };
+            if (map.getSource('route' + i)) {
+                map.getSource('route' + i).setData(geojson);
+            } else {
+                map.addLayer({
+                    id: 'route' + i,
+                    type: 'line',
+                    source: {
+                        type: 'geojson',
+                        data: geojson
+                    },
+                    layout: {
+                        'line-join': 'round',
+                        'line-cap': 'round'
+                    },
+                    paint: {
+                        'line-color': '#3887be',
+                        'line-width': 5,
+                        'line-opacity': 0.75
+                    }
+                });
+            }
         }
+    } catch (error) {
+        console.error('Ошибка при построении маршрута:', error);
+        alert('Ошибка при построении маршрута. Невозможно построить маршрут!');
     }
 }
+
 
     document.getElementById('buildRouteButton').addEventListener('click', getRoute);
 </script>

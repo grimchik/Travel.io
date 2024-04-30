@@ -86,6 +86,12 @@
             Начать новое путешествие!
         </button>
     </form>
+    <form action="/logout" method="post">
+        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+        <button type="submit" style="text-align: center; width: 100%" >
+            Выйти из аккаунта
+        </button>
+    </form>
 </div>
 <script>
     var longitude = parseFloat([[${longitude}]]);

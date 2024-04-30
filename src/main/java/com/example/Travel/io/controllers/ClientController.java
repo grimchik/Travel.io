@@ -3,8 +3,6 @@ import com.example.Travel.io.Model.Client;
 import com.example.Travel.io.Model.GeoIP;
 import com.example.Travel.io.Service.*;
 import com.example.Travel.io.Storage.TokenStorage;
-import com.example.Travel.io.token.JwtRequest;
-import com.example.Travel.io.token.JwtUtil;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,15 +15,15 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -42,8 +40,6 @@ public class ClientController {
     private static String base64Image;
     private final GeoIPService geoIPService;
     private final HttpServletRequest request;
-    private final TokenStorage tokenStorage;
-    private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
     private final serviceClient serviceClient;
     @GetMapping("/")
@@ -136,6 +132,7 @@ public class ClientController {
         return "profile";
     }
     @PostMapping("/try-login")
+
     public String trylogin(@RequestParam String username, @RequestParam String password, Model model, RedirectAttributes redirectAttributes) {
         try {
             Authentication authentication =authenticationManager.authenticate(
