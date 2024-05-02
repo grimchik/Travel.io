@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Demo: Local search with the Geocoding API</title>
+    <title>Hello, ${username}!</title>
+    <link rel="shortcut icon" href="/icon.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js"></script>
     <link
+
             href="https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.css"
             rel="stylesheet"
     />
@@ -94,6 +96,9 @@
     </form>
 </div>
 <script>
+    var username = "UserNickname";
+    var titleElement = document.getElementById("username");
+    titleElement.textContent = username;
     var longitude = parseFloat([[${longitude}]]);
     var latitude = parseFloat([[${latitude}]]);
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JpbWNoaWsiLCJhIjoiY2x1YmlyNmJ6MGZ4MTJwcGdkMW4wajFtdyJ9.DQjm2ZXzV6ggKJCKbNdlMw';

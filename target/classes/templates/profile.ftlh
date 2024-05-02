@@ -1,70 +1,179 @@
 <!DOCTYPE html>
 <html lang="en">
-<style>
-    #circular-image {
-                border-radius: 50%;
-                width: 100px;
-                height: 100px;
-            }
+<head>
+    <style>
+        #circular-image {
+border-radius: 50%;
+width: 100px;
+height: 100px;
+}
 
-            #image-container {
-                position: absolute;
-                margin-left: auto;
-                margin-right: auto;
-                border-radius: 50%;
-            }
-    .Btn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  width: 100px;
-  height: 40px;
-  border: none;
-  padding: 0px 20px;
-  background-color: rgb(168, 38, 255);
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  border-radius: 10px;
-  box-shadow: 5px 5px 0px rgb(140, 32, 212);
-  transition-duration: .3s;
+#image-container {
+position: absolute;
+margin-left: auto;
+margin-right: auto;
+border-radius: 50%;
+}
+.Btn {
+position: relative;
+display: flex;
+align-items: center;
+justify-content: flex-start;
+width: 100px;
+height: 40px;
+border: none;
+padding: 0px 20px;
+background-color: rgb(168, 38, 255);
+color: white;
+font-weight: 500;
+cursor: pointer;
+border-radius: 10px;
+box-shadow: 5px 5px 0px rgb(140, 32, 212);
+transition-duration: .3s;
 }
 
 .svg {
-  width: 13px;
-  position: absolute;
-  right: 0;
-  margin-right: 20px;
-  fill: white;
-  transition-duration: .3s;
+width: 13px;
+position: absolute;
+right: 0;
+margin-right: 20px;
+fill: white;
+transition-duration: .3s;
 }
 
 .Btn:hover {
-  color: transparent;
+color: transparent;
 }
 
 .Btn:hover svg {
-  right: 43%;
-  margin: 0;
-  padding: 0;
-  border: none;
-  transition-duration: .3s;
+right: 43%;
+margin: 0;
+padding: 0;
+border: none;
+transition-duration: .3s;
 }
 
 .Btn:active {
-  transform: translate(3px , 3px);
-  transition-duration: .3s;
-  box-shadow: 2px 2px 0px rgb(140, 32, 212);
+transform: translate(3px , 3px);
+transition-duration: .3s;
+box-shadow: 2px 2px 0px rgb(140, 32, 212);
 }
-</style>
+.modal {
+display: none; /* По умолчанию скрыто */
+position: fixed;
+z-index: 1;
+left: 0;
+top: 0;
+width: 100%;
+height: 100%;
+overflow: auto;
+background-color: rgba(0,0,0,0.4); /* Черный цвет с непрозрачностью 40% */
+}
+
+.modal-content {
+background-color: #fefefe;
+margin: 15% auto;
+padding: 20px;
+border: 1px solid #888;
+width: 80%;
+}
+
+/* Кнопка закрытия модального окна */
+.close {
+color: #aaaaaa;
+float: right;
+font-size: 28px;
+font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+color: #000;
+text-decoration: none;
+cursor: pointer;
+}
+    </style>
+</head>
 <body>
 <div id="image-container">
     <img id="circular-image" src="data:image/png;base64,${base64Image}" alt="avatar">
 </div>
-    <button class="Btn">Edit
-        <svg class="svg" viewBox="0 0 512 512">
-            <path d="M410.3 231l11.3-11.3-33.9-33.9-62.1-62.1L291.7 89.8l-11.3 11.3-22.6 22.6L58.6 322.9c-10.4 10.4-18 23.3-22.2 37.4L1 480.7c-2.5 8.4-.2 17.5 6.1 23.7s15.3 8.5 23.7 6.1l120.3-35.4c14.1-4.2 27-11.8 37.4-22.2L387.7 253.7 410.3 231zM160 399.4l-9.1 22.7c-4 3.1-8.5 5.4-13.3 6.9L59.4 452l23-78.1c1.4-4.9 3.8-9.4 6.9-13.3l22.7-9.1v32c0 8.8 7.2 16 16 16h32zM362.7 18.7L348.3 33.2 325.7 55.8 314.3 67.1l33.9 33.9 62.1 62.1 33.9 33.9 11.3-11.3 22.6-22.6 14.5-14.5c25-25 25-65.5 0-90.5L453.3 18.7c-25-25-65.5-25-90.5 0zm-47.4 168l-144 144c-6.2 6.2-16.4 6.2-22.6 0s-6.2-16.4 0-22.6l144-144c6.2-6.2 16.4-6.2 22.6 0s6.2 16.4 0 22.6z"></path></svg>
-    </button>
+<button class="Btn">Edit
+    <svg class="svg" viewBox="0 0 512 512">
+        <!-- SVG иконка здесь -->
+    </svg>
+</button>
+<button class="button" onclick="openSearchModal()">
+    Добавить друга!
+</button>
+
+<!-- Модальное окно для поиска пользователя -->
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeSearchModal()">&times;</span>
+        <form id="searchForm" onsubmit="searchUser(); return false;">
+            <input type="text" id="searchInput" placeholder="Введите логин пользователя">
+            <button type="submit">Искать</button>
+        </form>
+        <div id="searchResults"></div>
+    </div>
+</div>
+
+<script>
+    // Функция для открытия модального окна
+    function openSearchModal() {
+        document.getElementById('searchModal').style.display = 'block';
+    }
+
+    // Функция для закрытия модального окна
+    function closeSearchModal() {
+        document.getElementById('searchModal').style.display = 'none';
+    }
+
+    // Функция для отправки запроса на поиск пользователя
+    function searchUser() {
+        var searchInput = document.getElementById('searchInput').value;
+        fetch('/search?query=' + searchInput)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('searchResults').innerHTML = '';
+                data.forEach(function(user) {
+                    var userElement = document.createElement('div');
+                    userElement.innerHTML = user.username;
+                    var addButton = document.createElement('button');
+                    addButton.textContent = 'Добавить в друзья';
+                    addButton.onclick = function() {
+                        addFriend(user.username);
+                    };
+                    userElement.appendChild(addButton); // Добавляем кнопку к элементу пользователя
+                    document.getElementById('searchResults').appendChild(userElement); // Добавляем пользователя на страницу
+                });
+            })
+            .catch(error => console.error('Ошибка при выполнении поиска:', error));
+    }
+
+    // Функция для отправки запроса на добавление друга
+    function addFriend(username) {
+    var csrfTokenValue = "${_csrf.token}";
+        fetch('/addFriend', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfTokenValue
+            },
+            body: JSON.stringify({
+                username: username,
+            }),
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Отправлена заявка пользователю ' + username + ' для добавления в друзья!');
+            } else {
+                alert('Не удалось отправить заявку пользователю ' + username + ' для добавления в друзья.');
+            }
+        })
+        .catch(error => console.error('Ошибка при отправке запроса:', error));
+    }
+</script>
 </body>
 </html>

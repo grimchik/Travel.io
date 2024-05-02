@@ -30,6 +30,7 @@ import java.io.InputStreamReader;
 import java.net.*;
 import java.text.AttributedString;
 import java.util.Base64;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -47,10 +48,31 @@ public class ClientController {
     {
         return "mainPage";
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Client>> searchUsers(@RequestParam("query") String query) {
+        // Выполнить поиск пользователей в базе данных по частичному совпадению логина
+        List<Client> users = serviceClient.findByLoginContaining(query);
+        return ResponseEntity.ok(users);
+    }
+    @PostMapping("/addFriend")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> addFriend(@RequestBody String username) {
+        boolean success = serviceClient.addFriend(client.getLogin(), username);
+        if (success) {
+            return ResponseEntity.ok("User added to friends successfully!");
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to friends.");
+        }
+    }
+
+
     @GetMapping("/hello")
     @PreAuthorize("isAuthenticated()")
     public String hello(Model model)
     {
+        String username = client.getLogin();
+        model.addAttribute("username", username);
         int idValue = client.getIdClient();
         Integer id = Integer.valueOf(idValue);
         var image = serviceClient.findImage(id);
@@ -119,10 +141,6 @@ public class ClientController {
     public String newTravel(Model model) {
         model.addAttribute("longitude", longitude );
         model.addAttribute("latitude", latitude);
-        String brestLongitude="23.7341";
-        String brestLatitude="52.0976";
-        model.addAttribute("brestLongitude", brestLongitude);
-        model.addAttribute("brestLatitude", brestLatitude);
         return "newtravel";
     }
     @GetMapping("/profile")

@@ -1,9 +1,12 @@
 package com.example.Travel.io.Service;
 import com.example.Travel.io.Model.*;
 import com.example.Travel.io.Model.Image;
+import com.example.Travel.io.Model.emuns.InviteStatus;
 import com.example.Travel.io.Model.emuns.Role;
 import com.example.Travel.io.repositories.ClientRepository;
 import com.example.Travel.io.repositories.ImageRepository;
+import com.example.Travel.io.repositories.InviteRepository;
+import com.nimbusds.jose.shaded.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,13 +28,15 @@ public class serviceClient
     private static final String EMAIL_PATTERN = "^[_A-Za-z0-9-+]+(.[_A-Za-z0-9-]+)*@" + "[A-Za-z0-9-]+(.[A-Za-z0-9]+)*(.[A-Za-z]{2,150})$";
     private final ClientRepository clientRepository;
     private final ImageRepository imageRepository;
+    private final InviteRepository inviteRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public serviceClient(ImageRepository imageRepository, ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
+    public serviceClient(InviteRepository inviteRepository,ImageRepository imageRepository, ClientRepository clientRepository, PasswordEncoder passwordEncoder) {
         this.clientRepository = clientRepository;
         this.imageRepository=imageRepository;
         this.passwordEncoder = passwordEncoder;
+        this.inviteRepository=inviteRepository;
     }
     public String encode(String pas)
     {
@@ -110,6 +115,30 @@ public class serviceClient
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
+    }
+    public List<Client> findByLoginContaining(String login)
+    {
+        return clientRepository.findByLoginContaining(login);
+    }
+    public boolean addFriend(String from,String to) {
+        int startIndex = to.indexOf(":") + 2;
+        int endIndex = to.lastIndexOf("\"");
+        String username = to.substring(startIndex, endIndex);System.out.println(username);
+        to = username;
+        System.out.println(to);
+        Client fromClient = clientRepository.findBylogin(from);
+        Client toClient = clientRepository.findBylogin(to);
+        boolean friendshipExists = inviteRepository.findByFromLoginAndToLogin(from, to).isPresent();
+
+        if (friendshipExists) {
+            return false;
+        }
+        Invite invite = new Invite();
+        invite.setFrom(fromClient);
+        invite.setTo(toClient);
+        invite.setStatus(InviteStatus.PENDING);
+        inviteRepository.save(invite);
+        return true;
     }
     public boolean isValidPassword(String password){
         return validatePassword(password);

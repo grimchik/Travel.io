@@ -80,7 +80,8 @@ public class Client  implements UserDetails {
     public Set<Role> getRoles() {
         return roles;
     }
-
+    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+    private Set<Client> friends;
     @Getter
     @Setter
     private LocalDateTime dateOfCreated;
