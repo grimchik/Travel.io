@@ -10,5 +10,6 @@ import java.util.List;
 public interface ClientRepository extends JpaRepository<Client,Long>
 {
     Client findBylogin(String login);
+    Client findByIdClient(int id);
     List<Client> findByLoginContaining(String login);
 }

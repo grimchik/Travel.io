@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -74,7 +74,7 @@ public class serviceClient
         image.setImage(avatar.getBytes());
         return image;
     }
-    public Image findImage(Integer id)
+    public Image findImage(Long id)
     {
         return imageRepository.findByClientIdClient(id);
     }
@@ -116,6 +116,26 @@ public class serviceClient
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+    public void changeStatusInvite(InviteStatus status, String to, String from)
+    {
+        Client fromClient = clientRepository.findBylogin(from);
+        Client toClient = clientRepository.findBylogin(to);
+        Invite friendshipExists = inviteRepository.findByFromLoginAndToLogin(from, to).get();
+        if (status == InviteStatus.DECLINE)
+        {
+            friendshipExists.setStatus(InviteStatus.DECLINE);
+            inviteRepository.save(friendshipExists);
+        }
+        else
+        {
+            friendshipExists.setStatus(InviteStatus.APPROVE);
+            inviteRepository.save(friendshipExists);
+            fromClient.getFriends().add(toClient);
+            toClient.getFriends().add(fromClient);
+            clientRepository.save(fromClient);
+            clientRepository.save(toClient);
+        }
+    }
     public List<Client> findByLoginContaining(String login)
     {
         return clientRepository.findByLoginContaining(login);
@@ -128,17 +148,30 @@ public class serviceClient
         System.out.println(to);
         Client fromClient = clientRepository.findBylogin(from);
         Client toClient = clientRepository.findBylogin(to);
-        boolean friendshipExists = inviteRepository.findByFromLoginAndToLogin(from, to).isPresent();
-
-        if (friendshipExists) {
-            return false;
+        if (inviteRepository.findByFromLoginAndToLogin(from, to).isPresent()) {
+            Invite friendshipExists = inviteRepository.findByFromLoginAndToLogin(from, to).get();
+            if (friendshipExists.getStatus() == InviteStatus.PENDING)
+            {
+                return false;
+            }
+            else
+            {
+                Invite invite = new Invite();
+                invite.setFrom(fromClient);
+                invite.setTo(toClient);
+                invite.setStatus(InviteStatus.PENDING);
+                inviteRepository.save(invite);
+                return true;
+            }
         }
-        Invite invite = new Invite();
-        invite.setFrom(fromClient);
-        invite.setTo(toClient);
-        invite.setStatus(InviteStatus.PENDING);
-        inviteRepository.save(invite);
-        return true;
+        else {
+            Invite invite = new Invite();
+            invite.setFrom(fromClient);
+            invite.setTo(toClient);
+            invite.setStatus(InviteStatus.PENDING);
+            inviteRepository.save(invite);
+            return true;
+        }
     }
     public boolean isValidPassword(String password){
         return validatePassword(password);
@@ -147,6 +180,17 @@ public class serviceClient
         Pattern pattern = Pattern.compile(PASSWORD_PATTERN);
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
+    }
+
+    public List<Invite> getInvitesByClientId(Long id) {
+    List<Invite> inv= inviteRepository.findByTo(clientRepository.findById(id).get());
+    List<Invite> invites = new ArrayList<Invite>();
+        for (Invite invite : inv) {
+            if (invite.getStatus() == InviteStatus.PENDING) {
+                invites.add(invite);
+            }
+        }
+        return invites;
     }
    /* public boolean isValidPhone(String phone){
         return (validateEmail(phone));

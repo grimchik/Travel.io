@@ -18,6 +18,42 @@
             type="text/css"
     />
     <style>
+        /* Стили для модального окна */
+.modal {
+    display: none; /* по умолчанию скрыто */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
         body {
           margin: 0;
           padding: 0;
@@ -49,33 +85,70 @@
           position: absolute;
           bottom: 20px;
         }
-
-        .button {
-            width: 200px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: rgb(161, 255, 20);
-            border-radius: 30px;
-            color: rgb(19, 19, 19);
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition-duration: .2s;
-            box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.116);
-            font-size: 14px;
+        #profile-form {
+            margin-right: 10px; /* добавьте отступ справа, чтобы разделить кнопки */
         }
+        .buttonbell {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgb(44, 44, 44);
+    border-radius: 50%;
+    cursor: pointer;
+    transition-duration: .3s;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.13);
+    border: none;
+}
 
-        .button:hover {
-            background-color: rgb(192, 255, 20);
-            transition-duration: .5s;
-        }
+.bell {
+    width: 18px;
+}
 
-        .button:active {
-            transform: scale(0.97);
-            transition-duration: .2s;
-        }
+.bell path {
+    fill: white;
+}
+
+.buttonbell:hover {
+    background-color: rgb(56, 56, 56);
+}
+
+.buttonbell:hover .bell {
+    animation: bellRing 0.9s both;
+}
+
+/* bell ringing animation keyframes*/
+@keyframes bellRing {
+    0%,
+    100% {
+        transform-origin: top;
+    }
+
+    15% {
+        transform: rotateZ(10deg);
+    }
+
+    30% {
+        transform: rotateZ(-10deg);
+    }
+
+    45% {
+        transform: rotateZ(5deg);
+    }
+
+    60% {
+        transform: rotateZ(-5deg);
+    }
+
+    75% {
+        transform: rotateZ(2deg);
+    }
+}
+
+.buttonbell:active {
+    transform: scale(0.8);
+}
     </style>
 </head>
 <body>
@@ -95,10 +168,25 @@
         </button>
     </form>
 </div>
+<div id="requestsModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="requestsList"></div>
+    </div>
+</div>
+<div id="image-container">
+    <form id="profile-form" action="/profile" method="get">
+        <button type="submit" style="border: none; background: none; padding: 0; margin: 0;">
+            <img id="circular-image" src="data:image/png;base64,${base64Image}" alt="avatar">
+        </button>
+    </form>
+    <button id="showRequestsButton" class="buttonbell">
+        <svg viewBox="0 0 448 512" class="bell"><path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"></path></svg>
+    </button>
+</div>
 <script>
     var username = "UserNickname";
     var titleElement = document.getElementById("username");
-    titleElement.textContent = username;
     var longitude = parseFloat([[${longitude}]]);
     var latitude = parseFloat([[${latitude}]]);
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JpbWNoaWsiLCJhIjoiY2x1YmlyNmJ6MGZ4MTJwcGdkMW4wajFtdyJ9.DQjm2ZXzV6ggKJCKbNdlMw';
@@ -151,13 +239,125 @@
             zoom: 10
         });
     });
+    // Добавляем обработчик события на клик по кнопке
+// Добавляем обработчик события на клик по кнопке
+document.getElementById('showRequestsButton').addEventListener('click', function() {
+    fetchFriendInvitations();
+});
+
+// Добавляем обработчик события на нажатие клавиши Enter
+document.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        fetchFriendInvitations();
+    }
+});
+
+// Функция для получения приглашений в друзья
+function fetchFriendInvitations() {
+    fetch('/friend-invitations')
+        .then(response => response.json())
+        .then(data => {
+            displayRequests(data);
+        })
+        .catch(error => {
+            console.error('Error fetching friend invitations:', error);
+        });
+}
+
+function displayRequests(data) {
+    var csrfTokenValue = "${_csrf.token}";
+    const requestsList = document.getElementById('requestsList');
+    data.forEach(request => {
+        const requestItem = document.createElement('div');
+        const senderName = request.from.login; // Получаем имя отправителя из объекта приглашения
+        requestItem.textContent = senderName + ' хочет добавить вас в друзья.';
+
+        // Создаем кнопку "Добавить в друзья"
+        const addButton = document.createElement('button');
+        addButton.textContent = 'Добавить в друзья';
+        addButton.addEventListener('click', function() {
+            fetch('/accept-friend', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfTokenValue
+                },
+                body: JSON.stringify({ friendUsername: request.from.login })
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Пользователь ' + request.from.login + ' добавлен в друзья.');
+                    addButton.style.display = 'none';
+                     rejectButton.style.display = 'none';
+                    // Показываем сообщение
+                    const message = document.createElement('span');
+                    message.textContent = 'Пользователь ' + request.from.login + ' добавлен в друзья.';
+                    requestItem.appendChild(message);
+                    // Здесь можно обновить интерфейс, например, удалить элемент списка приглашений
+                    // requestsList.removeChild(requestItem);
+                } else {
+                    console.error('Ошибка при добавлении в друзья:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса:', error);
+            });
+        });
+
+        // Создаем кнопку "Не добавлять"
+        const rejectButton = document.createElement('button');
+        rejectButton.textContent = 'Не добавлять';
+        rejectButton.addEventListener('click', function() {
+            fetch('/reject-invitation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfTokenValue
+                },
+                body: JSON.stringify({ friendUsername: request.from.login })
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Приглашение от ' + request.from.login + ' отклонено.');
+                    // Скрываем кнопки после нажатия
+                     addButton.style.display = 'none';
+                     rejectButton.style.display = 'none';
+                     // Показываем сообщение
+                     const message = document.createElement('span');
+                     message.textContent = 'Приглашение от ' + request.from.login + ' отклонено.';
+                    requestItem.appendChild(message);
+                    } else {
+                    console.error('Ошибка при отклонении приглашения:', response.statusText);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при отправке запроса:', error);
+            });
+        });
+
+        requestItem.appendChild(addButton);
+        requestItem.appendChild(rejectButton);
+        requestsList.appendChild(requestItem);
+    });
+
+    // Отображаем модальное окно
+    const modal = document.getElementById('requestsModal');
+    modal.style.display = 'block';
+
+    // Добавляем обработчик события для закрытия модального окна при клике на кнопку закрытия
+    const closeBtn = document.getElementsByClassName('close')[0];
+    closeBtn.onclick = function() {
+        modal.style.display = 'none';
+    };
+
+    // Добавляем обработчик события для закрытия модального окна при клике вне его
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    };
+}
+
 </script>
-<div id="image-container">
-    <form id="profile-form" action="/profile" method="get">
-        <button type="submit" style="border: none; background: none; padding: 0; margin: 0;">
-            <img id="circular-image" src="data:image/png;base64,${base64Image}" alt="avatar">
-        </button>
-    </form>
-</div>
 </body>
 </html>

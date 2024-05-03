@@ -37,7 +37,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http
 
                 .authorizeRequests()
-                .antMatchers("/hello","/newtravel","/profile","/addFriend").authenticated()
+                .antMatchers("/friend-invitations","/hello","/newtravel","/profile","/addFriend","/accept-friend","/reject-invitation").authenticated()
                 .antMatchers("/**","/login**","/try-login**","/try-registration**","/registration**").permitAll()
                 .and()
                 .formLogin()

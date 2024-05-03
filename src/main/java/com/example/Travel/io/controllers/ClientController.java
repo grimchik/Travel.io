@@ -1,6 +1,8 @@
 package com.example.Travel.io.controllers;
 import com.example.Travel.io.Model.Client;
 import com.example.Travel.io.Model.GeoIP;
+import com.example.Travel.io.Model.Invite;
+import com.example.Travel.io.Model.emuns.InviteStatus;
 import com.example.Travel.io.Service.*;
 import com.example.Travel.io.Storage.TokenStorage;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
@@ -31,6 +33,7 @@ import java.net.*;
 import java.text.AttributedString;
 import java.util.Base64;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -55,6 +58,30 @@ public class ClientController {
         List<Client> users = serviceClient.findByLoginContaining(query);
         return ResponseEntity.ok(users);
     }
+    @GetMapping("/friend-invitations")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<Invite>> getFriendInvitations() {
+        Long id = client.getIdClient();
+        List<Invite> invites = serviceClient.getInvitesByClientId(id);
+        return ResponseEntity.ok(invites);
+    }
+    @PostMapping("/accept-friend")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> addFriend(@RequestBody Map<String, String> requestData) {
+        String friendUsername = requestData.get("friendUsername");
+        serviceClient.changeStatusInvite(InviteStatus.APPROVE,client.getLogin(),friendUsername);
+        return ResponseEntity.ok("Пользователь " + friendUsername + " успешно добавлен в друзья.");
+    }
+
+    @PostMapping("/reject-invitation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<String> rejectInvitation(@RequestBody Map<String, String> requestData) {
+        String friendUsername = requestData.get("friendUsername");
+        serviceClient.changeStatusInvite(InviteStatus.DECLINE,client.getLogin(),friendUsername);
+
+        return ResponseEntity.ok("Приглашение от пользователя " + friendUsername + " успешно отклонено.");
+    }
+
     @PostMapping("/addFriend")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<String> addFriend(@RequestBody String username) {
@@ -73,8 +100,8 @@ public class ClientController {
     {
         String username = client.getLogin();
         model.addAttribute("username", username);
-        int idValue = client.getIdClient();
-        Integer id = Integer.valueOf(idValue);
+        Long idValue = client.getIdClient();
+        Long id = idValue;
         var image = serviceClient.findImage(id);
         if (image != null) {
             byte[] imageData = image.getImage();

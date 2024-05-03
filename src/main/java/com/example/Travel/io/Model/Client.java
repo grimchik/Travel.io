@@ -35,7 +35,7 @@ public class Client  implements UserDetails {
     @Column(name = "id_client")
     @Getter
     @Setter
-    private int idClient;
+    private Long idClient;
 
     @Column(name = "login", unique = true, nullable = false)
     @Getter
@@ -81,6 +81,8 @@ public class Client  implements UserDetails {
         return roles;
     }
     @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+    @Getter
+    @Setter
     private Set<Client> friends;
     @Getter
     @Setter
