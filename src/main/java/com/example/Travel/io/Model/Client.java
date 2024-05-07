@@ -67,6 +67,7 @@ public class Client  implements UserDetails {
     @Setter
     private Set<Role> roles = new HashSet<>();
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "client")
+    @Getter
     private Image image;
     private Long imageId;
     public void setActive(boolean active) {
@@ -120,7 +121,11 @@ public class Client  implements UserDetails {
     public String getPassword() {
         return password;
     }
-
+    @Override
+    public String toString()
+    {
+        return "Login - " +this.login + "Mail - " + this.mail + "Phone - " + this.phoneNumber;
+    }
     @Override
     public String getUsername() {
         return login;

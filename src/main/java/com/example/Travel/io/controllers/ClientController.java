@@ -1,14 +1,14 @@
 package com.example.Travel.io.controllers;
-import com.example.Travel.io.Model.Client;
-import com.example.Travel.io.Model.GeoIP;
-import com.example.Travel.io.Model.Invite;
+import com.example.Travel.io.Model.*;
 import com.example.Travel.io.Model.emuns.InviteStatus;
 import com.example.Travel.io.Service.*;
+import org.springframework.web.multipart.MultipartFile;
 import com.example.Travel.io.Storage.TokenStorage;
 import com.maxmind.geoip2.exception.GeoIp2Exception;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,11 +26,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import javax.transaction.Transactional;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
 import java.text.AttributedString;
+import java.util.ArrayList;
+
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +41,7 @@ import java.util.Map;
 @Controller
 @RequiredArgsConstructor
 public class ClientController {
+    private int count =0;
     private static Client client;
     private static String latitude;
     private static String longitude;
@@ -51,19 +55,47 @@ public class ClientController {
     {
         return "mainPage";
     }
+    @PostMapping("/upload-avatar")
+    public ResponseEntity<String> uploadAvatar(@RequestParam("avatar") MultipartFile avatar) throws IOException {
+        serviceClient.saveAvatar(client,avatar);
+        return ResponseEntity.ok().body("Avatar uploaded successfully");
+    }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Client>> searchUsers(@RequestParam("query") String query) {
-        // Выполнить поиск пользователей в базе данных по частичному совпадению логина
+    @ResponseBody
+    public ResponseEntity<List<ClientInfo>> searchUsers(@RequestParam("query") String query) {
         List<Client> users = serviceClient.findByLoginContaining(query);
-        return ResponseEntity.ok(users);
+        List<ClientInfo> userInfoList = new ArrayList<>();
+        for (Client user : users) {
+            ClientInfo userInfo = new ClientInfo();
+            userInfo.setLogin(user.getLogin());
+            byte[] imageData = user.getImage().getImage();
+            userInfo.setImage(Base64.getEncoder().encodeToString(imageData));
+            if (!user.getLogin().equals(client.getLogin()))
+            userInfoList.add(userInfo);
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(userInfoList);
     }
+
     @GetMapping("/friend-invitations")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<List<Invite>> getFriendInvitations() {
+    public ResponseEntity<List<ClientInfo>> getFriendInvitations() {
         Long id = client.getIdClient();
         List<Invite> invites = serviceClient.getInvitesByClientId(id);
-        return ResponseEntity.ok(invites);
+        List<ClientInfo> userInfoList = new ArrayList<>();
+        for (Invite inv: invites) {
+            ClientInfo userInfo = new ClientInfo();
+            userInfo.setLogin(inv.getFrom().getLogin());
+            byte[] imageData = inv.getFrom().getImage().getImage();
+            userInfo.setImage(Base64.getEncoder().encodeToString(imageData));
+            if (!inv.getFrom().getLogin().equals(client.getLogin()))
+            userInfoList.add(userInfo);
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(userInfoList);
     }
     @PostMapping("/accept-friend")
     @PreAuthorize("isAuthenticated()")
@@ -78,18 +110,18 @@ public class ClientController {
     public ResponseEntity<String> rejectInvitation(@RequestBody Map<String, String> requestData) {
         String friendUsername = requestData.get("friendUsername");
         serviceClient.changeStatusInvite(InviteStatus.DECLINE,client.getLogin(),friendUsername);
-
         return ResponseEntity.ok("Приглашение от пользователя " + friendUsername + " успешно отклонено.");
     }
 
     @PostMapping("/addFriend")
     @PreAuthorize("isAuthenticated()")
+    @Transactional
     public ResponseEntity<String> addFriend(@RequestBody String username) {
         boolean success = serviceClient.addFriend(client.getLogin(), username);
         if (success) {
             return ResponseEntity.ok("User added to friends successfully!");
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to add user to friends.");
+            return ResponseEntity.ok("User doesn't added to friends successfully!");
         }
     }
 
@@ -153,14 +185,12 @@ public class ClientController {
         if (repeat_password.equals(password)&& serviceClient.isValidPassword(password) && serviceClient.isValidEmail(email)) {
             Client client = new Client(0, login, password, email, phone, true);
             client.setDefaultAvatar();
-            System.out.println(client.getPassword());
             if (!serviceClient.createClient(client)) {
                 model.addAttribute("errorMessage", "User with this login are exist!");
                 return "registration";
             }
             return "redirect:/login";
         }
-        System.out.println(serviceClient.isValidPassword(password) && serviceClient.isValidEmail(email));
         return "registration";
     }
     @GetMapping("/newtravel")

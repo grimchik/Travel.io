@@ -265,11 +265,13 @@ function fetchFriendInvitations() {
 }
 
 function displayRequests(data) {
+    console.log(data);
     var csrfTokenValue = "${_csrf.token}";
     const requestsList = document.getElementById('requestsList');
     data.forEach(request => {
         const requestItem = document.createElement('div');
-        const senderName = request.from.login; // Получаем имя отправителя из объекта приглашения
+        const senderName = request.login;
+        requestsList.innerHTML = '';
         requestItem.textContent = senderName + ' хочет добавить вас в друзья.';
 
         // Создаем кнопку "Добавить в друзья"
@@ -282,16 +284,16 @@ function displayRequests(data) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfTokenValue
                 },
-                body: JSON.stringify({ friendUsername: request.from.login })
+                body: JSON.stringify({ friendUsername: request.login })
             })
             .then(response => {
                 if (response.ok) {
-                    console.log('Пользователь ' + request.from.login + ' добавлен в друзья.');
+                    console.log('Пользователь ' + request.login + ' добавлен в друзья.');
                     addButton.style.display = 'none';
-                     rejectButton.style.display = 'none';
+                    rejectButton.style.display = 'none';
                     // Показываем сообщение
                     const message = document.createElement('span');
-                    message.textContent = 'Пользователь ' + request.from.login + ' добавлен в друзья.';
+                    message.textContent = 'Пользователь ' + request.login + ' добавлен в друзья.';
                     requestItem.appendChild(message);
                     // Здесь можно обновить интерфейс, например, удалить элемент списка приглашений
                     // requestsList.removeChild(requestItem);
@@ -314,17 +316,17 @@ function displayRequests(data) {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': csrfTokenValue
                 },
-                body: JSON.stringify({ friendUsername: request.from.login })
+                body: JSON.stringify({ friendUsername: request.login })
             })
             .then(response => {
                 if (response.ok) {
-                    console.log('Приглашение от ' + request.from.login + ' отклонено.');
+                    console.log('Приглашение от ' + request.login + ' отклонено.');
                     // Скрываем кнопки после нажатия
                      addButton.style.display = 'none';
                      rejectButton.style.display = 'none';
                      // Показываем сообщение
                      const message = document.createElement('span');
-                     message.textContent = 'Приглашение от ' + request.from.login + ' отклонено.';
+                     message.textContent = 'Приглашение от ' + request.login + ' отклонено.';
                     requestItem.appendChild(message);
                     } else {
                     console.error('Ошибка при отклонении приглашения:', response.statusText);

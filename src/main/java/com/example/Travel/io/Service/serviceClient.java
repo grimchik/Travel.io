@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -116,6 +117,7 @@ public class serviceClient
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+    @Transactional
     public void changeStatusInvite(InviteStatus status, String to, String from)
     {
         Client fromClient = clientRepository.findBylogin(from);
@@ -124,31 +126,57 @@ public class serviceClient
         if (status == InviteStatus.DECLINE)
         {
             friendshipExists.setStatus(InviteStatus.DECLINE);
-            inviteRepository.save(friendshipExists);
+            inviteRepository.updateInviteStatusBetweenUsers(fromClient,toClient,InviteStatus.DECLINE);
         }
         else
         {
             friendshipExists.setStatus(InviteStatus.APPROVE);
-            inviteRepository.save(friendshipExists);
+            inviteRepository.updateInviteStatusBetweenUsers(fromClient,toClient,InviteStatus.APPROVE);
             fromClient.getFriends().add(toClient);
             toClient.getFriends().add(fromClient);
             clientRepository.save(fromClient);
             clientRepository.save(toClient);
         }
     }
+    @Transactional
+    public void saveAvatar(Client client, MultipartFile avatar) throws IOException {
+        Image image = new Image();
+        var name = avatar.getName();
+        var originalFileName = avatar.getOriginalFilename();
+        var contentType = avatar.getContentType();
+        var size = avatar.getSize();
+        var imageData = avatar.getBytes(); // Получение массива байтов изображения
+
+        image.setName(name);
+        image.setOriginalFileName(originalFileName);
+        image.setContentType(contentType);
+        image.setSize(size);
+        image.setImage(imageData);
+        image.setClient(client);
+
+        imageRepository.updateImageByIdClient(
+                client.getIdClient(),
+                name,
+                originalFileName,
+                contentType,
+                size,
+                imageData
+        );
+    }
+    @Transactional
     public List<Client> findByLoginContaining(String login)
     {
         return clientRepository.findByLoginContaining(login);
     }
     public boolean addFriend(String from,String to) {
-        int startIndex = to.indexOf(":") + 2;
-        int endIndex = to.lastIndexOf("\"");
-        String username = to.substring(startIndex, endIndex);System.out.println(username);
-        to = username;
-        System.out.println(to);
+            int startIndex = to.indexOf(":") + 2;
+            int endIndex = to.lastIndexOf("\"");
+            String username = to.substring(startIndex, endIndex);
+            to = username;
         Client fromClient = clientRepository.findBylogin(from);
         Client toClient = clientRepository.findBylogin(to);
-        if (inviteRepository.findByFromLoginAndToLogin(from, to).isPresent()) {
+        if (inviteRepository.findByFromLoginAndToLogin(from, to).isPresent())
+        {
             Invite friendshipExists = inviteRepository.findByFromLoginAndToLogin(from, to).get();
             if (friendshipExists.getStatus() == InviteStatus.PENDING)
             {
@@ -156,15 +184,29 @@ public class serviceClient
             }
             else
             {
-                Invite invite = new Invite();
-                invite.setFrom(fromClient);
-                invite.setTo(toClient);
-                invite.setStatus(InviteStatus.PENDING);
-                inviteRepository.save(invite);
+                inviteRepository.updateInviteStatusBetweenUsers(fromClient,toClient,InviteStatus.PENDING);
                 return true;
             }
         }
-        else {
+        else if (inviteRepository.findByFromLoginAndToLogin(to,from).isPresent())
+        {
+            Invite friendshipExists = inviteRepository.findByFromLoginAndToLogin(to,from).get();
+            if (friendshipExists.getStatus() == InviteStatus.PENDING)
+            {
+                return false;
+            }
+            if (friendshipExists.getStatus() == InviteStatus.DECLINE)
+            {
+                inviteRepository.updateInviteStatusBetweenUsers(fromClient,toClient,InviteStatus.PENDING);
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        else
+        {
             Invite invite = new Invite();
             invite.setFrom(fromClient);
             invite.setTo(toClient);
