@@ -48,6 +48,7 @@ public class serviceClient
     {
         return clientRepository.count();
     }
+    @Transactional
     public boolean createClient (Client client)
     {
         if (clientRepository.findBylogin(client.getUsername()) != null) return false;
@@ -58,12 +59,16 @@ public class serviceClient
         return false;
         else {clientRepository.save(client) ; return true;}
     }
+
     public void saveImage(Client client, MultipartFile avatar) throws IOException {
         Image image;
         if (avatar.getSize() !=0)
         {
             image= toImage(avatar);
         }
+    }
+    public List<Client> findFriendsByClientId(Long id) {
+        return clientRepository.findFriendsById(id);
     }
     public Image toImage(MultipartFile avatar) throws IOException
     {
@@ -168,6 +173,7 @@ public class serviceClient
     {
         return clientRepository.findByLoginContaining(login);
     }
+
     public boolean addFriend(String from,String to) {
             int startIndex = to.indexOf(":") + 2;
             int endIndex = to.lastIndexOf("\"");

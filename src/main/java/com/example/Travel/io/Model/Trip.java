@@ -2,8 +2,9 @@ package com.example.Travel.io.Model;
 
 import javax.persistence.*;
 import lombok.*;
-import lombok.Setter;
-import lombok.Getter;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -18,11 +19,17 @@ public class Trip {
     @Setter
     private int idTrip;
 
-    @ManyToOne
-    @JoinColumn(name = "id_client_trips", nullable = false)
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "client_trip",
+            joinColumns = @JoinColumn(name = "trip_id"),
+            inverseJoinColumns = @JoinColumn(name = "client_id"))
+    private Set<Client> clients = new HashSet<>();
+
+    @OneToMany(mappedBy = "trip")
+    private Set<SubTrip> subTrips;
+
+    @Column(name = "name", nullable = false)
     @Getter
     @Setter
-    private Client client;
-
-    // Constructors, getters, and setters
+    private String name;
 }

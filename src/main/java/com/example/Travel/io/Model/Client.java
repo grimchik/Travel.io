@@ -32,10 +32,15 @@ public class Client  implements UserDetails {
     }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_client")
+    @Column(name = "idСlient")
     @Getter
     @Setter
     private Long idClient;
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "client_trip",
+            joinColumns = @JoinColumn(name = "client_id"),
+            inverseJoinColumns = @JoinColumn(name = "trip_id"))
+    private Set<Trip> trips;
 
     @Column(name = "login", unique = true, nullable = false)
     @Getter
@@ -69,6 +74,7 @@ public class Client  implements UserDetails {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "client")
     @Getter
     private Image image;
+
     private Long imageId;
     public void setActive(boolean active) {
         this.active = active;

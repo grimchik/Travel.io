@@ -187,8 +187,14 @@
 <script>
     var username = "UserNickname";
     var titleElement = document.getElementById("username");
-    var longitude = parseFloat([[${longitude}]]);
-    var latitude = parseFloat([[${latitude}]]);
+        <#if longitudeValue?has_content && latitudeValue?has_content>
+        var longitude = ${longitudeValue};
+        var latitude = ${latitudeValue};
+        <#else>
+        var longitude = 27.5667; // Долгота Минска
+        var latitude = 53.9; // Широта Минска
+        </#if>
+
     mapboxgl.accessToken = 'pk.eyJ1IjoiZ3JpbWNoaWsiLCJhIjoiY2x1YmlyNmJ6MGZ4MTJwcGdkMW4wajFtdyJ9.DQjm2ZXzV6ggKJCKbNdlMw';
     const map = new mapboxgl.Map({
         container: 'map',
@@ -208,13 +214,13 @@
     map.addControl(geocoder);
     */
     // Add Geolocate control to the map.
-    map.addControl(new mapboxgl.NavigationControl());
+    /*map.addControl(new mapboxgl.NavigationControl());
     map.addControl(new mapboxgl.GeolocateControl({
         positionOptions: {
             enableHighAccuracy: true
         },
         trackUserLocation: true
-    }));
+    }));*/
 
     let marker2;
 

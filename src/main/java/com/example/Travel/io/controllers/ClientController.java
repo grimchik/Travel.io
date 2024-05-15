@@ -60,7 +60,41 @@ public class ClientController {
         serviceClient.saveAvatar(client,avatar);
         return ResponseEntity.ok().body("Avatar uploaded successfully");
     }
+    @GetMapping("/get_user_friends")
+    public ResponseEntity<List<ClientInfo>> getUserFriends(@RequestParam("userLogin") String userLogin) {
+        List<ClientInfo> friends = new ArrayList<>();
+        List<Client> clients = serviceClient.findFriendsByClientId(serviceClient.getClientByLogin(userLogin).getIdClient());
+        for (Client clnt: clients)
+        {
+            ClientInfo clientInfo = new ClientInfo(clnt.getLogin(),Base64.getEncoder().encodeToString(clnt.getImage().getImage()));
+            friends.add(clientInfo);
+        }
+        System.out.println(clients.size());
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(friends);
+    }
+    @GetMapping("/profile/{username}")
+    @PreAuthorize("isAuthenticated()")
+    public String userPage(@PathVariable String username, Model model)
+    {
+        Client client1 = serviceClient.getClientByLogin(username);
+        var base64Image2 = client1.getImage().getImage();
+        model.addAttribute("base64Image", Base64.getEncoder().encodeToString(base64Image2));
+        return "userPage";
+    }
 
+    @GetMapping("/get_friends")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<ClientInfo>> getFriends() {
+        List<ClientInfo> friends = new ArrayList<>();
+        List<Client> clients = serviceClient.findFriendsByClientId(client.getIdClient());
+        for (Client clnt: clients)
+        {
+            ClientInfo clientInfo = new ClientInfo(clnt.getLogin(),Base64.getEncoder().encodeToString(clnt.getImage().getImage()));
+            friends.add(clientInfo);
+        }
+        System.out.println(clients.size());
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(friends);
+    }
     @GetMapping("/search")
     @ResponseBody
     public ResponseEntity<List<ClientInfo>> searchUsers(@RequestParam("query") String query) {
@@ -112,6 +146,10 @@ public class ClientController {
         serviceClient.changeStatusInvite(InviteStatus.DECLINE,client.getLogin(),friendUsername);
         return ResponseEntity.ok("Приглашение от пользователя " + friendUsername + " успешно отклонено.");
     }
+    public static Client getClient()
+    {
+        return client;
+    }
 
     @PostMapping("/addFriend")
     @PreAuthorize("isAuthenticated()")
@@ -148,9 +186,9 @@ public class ClientController {
                 ipAddress= br.readLine();
             }
         } catch (MalformedURLException e) {
-            e.printStackTrace(); // Обработка ошибки URL
+            e.printStackTrace();
         } catch (IOException e) {
-            e.printStackTrace(); // Обработка ошибки ввода-вывода при работе с URL
+            e.printStackTrace();
         }
         try {
             GeoIP location = geoIPService.getLocation(ipAddress);
@@ -207,7 +245,6 @@ public class ClientController {
         return "profile";
     }
     @PostMapping("/try-login")
-
     public String trylogin(@RequestParam String username, @RequestParam String password, Model model, RedirectAttributes redirectAttributes) {
         try {
             Authentication authentication =authenticationManager.authenticate(

@@ -150,6 +150,8 @@
 <div id="image-container">
     <img id="circular-image" src="data:image/png;base64,${base64Image}" alt="avatar">
 </div>
+
+
 <button class="Btn" onclick="document.getElementById('file-input').click();">Edit
     <svg class="svg" viewBox="0 0 512 512">
         <!-- SVG иконка здесь -->
@@ -172,8 +174,44 @@
         <div id="searchResults"></div>
     </div>
 </div>
-
+<div id="friends-list"></div>
 <script>
+    window.onload = function() {
+        loadFriendsList();
+    };
+
+    function loadFriendsList() {
+        fetch('/get_friends')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to fetch friends list');
+                }
+            })
+            .then(data => {
+                displayFriends(data);
+            })
+            .catch(error => {
+                console.error('Error loading friends list:', error);
+                alert('Failed to load friends list');
+            });
+    }
+
+    function displayFriends(friends) {
+        var friendsListContainer = document.getElementById('friends-list');
+        friends.forEach(function(friend) {
+            var friendElement = document.createElement('div');
+            friendElement.classList.add('friend');
+            friendElement.innerHTML = '<div class="avatar-container">' +
+                '<img class="avatar" src="data:image/jpeg;base64,' + friend.image + '" alt="Avatar">' +
+                '</div>' +
+                '<div class="username-container">' +
+                '<p><a href="/profile/' + friend.login + '">' + friend.login + '</a></p>' +
+                '</div>';
+            friendsListContainer.appendChild(friendElement);
+        });
+    }
     // Функция для открытия модального окна
     function openSearchModal() {
         document.getElementById('searchModal').style.display = 'block';
