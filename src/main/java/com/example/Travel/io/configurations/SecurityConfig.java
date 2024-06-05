@@ -20,6 +20,7 @@ import java.awt.*;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
+
     @Autowired
     private final CustomUserDetailsService customUserDetailsService;
     @Override
@@ -37,7 +38,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http
 
                 .authorizeRequests()
-                .antMatchers("/invitetotravel","/get_friends","/friend-invitations","/hello","/newtravel","/profile","/addFriend","/accept-friend","/reject-invitation","saveTravel").authenticated()
+                .antMatchers("/leave-travel","/delete-friend","delete-travel","/get_user_friends","/your-travels","/friends-list","/get_user_travels","/travel/{name}","/invitetotravel","/hello","/get_friends","/friend-invitations","/newtravel","/profile","/addFriend","/accept-friend","/reject-invitation","/saveTravelAdminCheck","/saveTravel","/profile/{username}").authenticated()
                 .antMatchers("/**","/login**","/try-login**","/try-registration**","/registration**").permitAll()
                 .and()
                 .formLogin()

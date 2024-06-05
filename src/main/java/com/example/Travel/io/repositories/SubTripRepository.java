@@ -10,4 +10,5 @@ import java.util.List;
 public interface SubTripRepository extends JpaRepository<SubTrip,Integer>
 {
     void deleteByTrip(Trip tripId);
+    List<SubTrip> findByTrip(Trip tripId);
 }

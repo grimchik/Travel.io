@@ -20,14 +20,13 @@ import static com.example.Travel.io.Model.emuns.Role.ROLE_USER;
 @AllArgsConstructor
 @Table(name = "Client")
 public class Client  implements UserDetails {
-    public Client(int id,String lg,String pas,String mail,String phone, boolean act )
+    public Client(int id,String lg,String pas,String mail, boolean act )
     {
         this.login = lg;
         this.mail=mail;
         this.password=pas;
         init();
         this.active=act;
-        this.phoneNumber=phone;
         this.roles.add(ROLE_USER);
     }
     @Id
@@ -57,10 +56,6 @@ public class Client  implements UserDetails {
     @Setter
     private String mail;
 
-    @Column(name = "phone_number", unique = true, nullable = false)
-    @Getter
-    @Setter
-    private String phoneNumber;
     @Column(name = "active")
     @Getter
     @Setter
@@ -91,6 +86,10 @@ public class Client  implements UserDetails {
     @Getter
     @Setter
     private Set<Client> friends;
+    @ManyToMany(fetch = FetchType.LAZY, cascade=CascadeType.ALL)
+    @Getter
+    @Setter
+    private Set<Achievement> achievements;
     @Getter
     @Setter
     private LocalDateTime dateOfCreated;
@@ -130,7 +129,7 @@ public class Client  implements UserDetails {
     @Override
     public String toString()
     {
-        return "Login - " +this.login + "Mail - " + this.mail + "Phone - " + this.phoneNumber;
+        return "Login - " +this.login + "Mail - " + this.mail ;
     }
     @Override
     public String getUsername() {

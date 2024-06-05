@@ -9,7 +9,7 @@ public class FreeMarkerConfig {
     @Bean
     public FreeMarkerConfigurer freeMarkerConfigurer() {
         FreeMarkerConfigurer configurer = new FreeMarkerConfigurer();
-        configurer.setTemplateLoaderPath("/WEB-INF/views/"); // Укажите путь к вашим файлам представлений
+        configurer.setTemplateLoaderPath("/WEB-INF/views/");
         return configurer;
     }
 

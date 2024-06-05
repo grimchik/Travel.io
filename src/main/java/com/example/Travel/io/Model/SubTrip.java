@@ -21,18 +21,23 @@ public class SubTrip {
     @Setter
     private Trip trip;
 
-    @Column(name = "pointA", nullable = false)
+    @Column(name = "point", nullable = false)
     @Getter
     @Setter
-    private String pointA;
-
-    @Column(name = "pointB", nullable = false)
-    @Getter
-    @Setter
-    private String pointB;
+    private String point;
 
     @Column(name = "transport_type", nullable = false)
     @Getter
     @Setter
     private String transportType;
+
+    @Column(name = "status", nullable = false)
+    private boolean status = false;
+    public boolean getStatus() {
+        return this.status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 }

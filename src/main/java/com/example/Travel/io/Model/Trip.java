@@ -12,12 +12,19 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "Trip")
 public class Trip {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idTrip")
     @Getter
     @Setter
     private int idTrip;
+
+    @ManyToOne
+    @JoinColumn(name = "administrator_id", nullable = false)
+    @Getter
+    @Setter
+    private Client administrator;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "client_trip",

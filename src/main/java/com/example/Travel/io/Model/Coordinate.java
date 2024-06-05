@@ -14,7 +14,12 @@ public class Coordinate {
     @Getter
     @Setter
     private double lat;
-
+    @Getter
+    @Setter
+    private String typeOfTransport;
+    @Getter
+    @Setter
+    private boolean status;
     @Override
     public String toString() {
         return

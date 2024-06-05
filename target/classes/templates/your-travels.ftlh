@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>
-        Профиль!
+        Your Travels!
     </title>
     <link rel="shortcut icon" href="/icon.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -57,11 +57,6 @@
 .sign svg path {
   fill: black;
 }
-.avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-}
 /* text */
 .text {
   position: absolute;
@@ -97,7 +92,7 @@
   transform: translate(2px, 2px);
 }
 .button2 {
-  width: 160px;
+  width: 220px;
   height: 40px;
   display: flex;
   align-items: center;
@@ -191,14 +186,12 @@
             width: 150px;
             height: 150px;
         }
+
         #image-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #circular-images {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             border-radius: 50%;
-            width: 100px;
-            height: 100px;
         }
         #map {
           width: 70%;
@@ -291,9 +284,6 @@
             padding-left: 15px; /* Отступ слева, чтобы граница не касалась текста */
         }
 
-        #file-input {
-            display: none;
-        }
         .bg-rgb-menu {
             background-color: rgb(192, 255, 20);
         }
@@ -353,48 +343,46 @@
         </div>
     </nav>
 </div>
-
-
-<div id="image-container">
-    <img id="circular-images" src="data:image/png;base64,${base64Image}" alt="avatar">
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Ваши Путешествия</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Администратор</th>
+                    <th>Количество участников</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <#list travels as trip>
+                <tr>
+                    <td><a href="/travel/${trip.name}">${trip.name}</a></td>
+                    <td>${trip.administrator}</td>
+                    <td>${trip.count}</td>
+                    <td>
+                        <form action="/delete-travel" method="get">
+                            <input type="hidden" name="travelId" value="${trip.name}" />
+                            <button type="submit" class="btn btn-danger">Удалить Путешествие</button>
+                        </form>
+                    </td>
+                </tr>
+                </#list>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
-<input type="file" id="file-input" accept="image/*" onchange="uploadImage(this.files)">
-<button class="button2" onclick="document.getElementById('file-input').click();">Изменить Аватарку
-</button>
 <div id="requestsModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
         <div id="requestsList"></div>
     </div>
 </div>
-<div id="searchModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeSearchModal()">&times;</span>
-        <form id="searchForm" onsubmit="searchUser(); return false;">
-            <input type="text" id="searchInput" placeholder="Введите логин пользователя">
-            <button class="button2" type="submit">Искать</button>
-        </form>
-        <div id="searchResults"></div>
-    </div>
-</div>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <h2>Список Достижений</h2>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Аватарка</th>
-                    <th>Название</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
+
+<!-- Подключение необходимых JS файлов -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
@@ -508,96 +496,6 @@
             }
         };
     }
-    function openSearchModal() {
-        document.getElementById('searchModal').style.display = 'block';
-    }
-
-    // Функция для закрытия модального окна
-    function closeSearchModal() {
-        document.getElementById('searchModal').style.display = 'none';
-    }
-
-    // Функция для отправки запроса на поиск пользователя
-    function searchUser() {
-    var searchInput = document.getElementById('searchInput').value;
-    fetch('/search?query=' + searchInput)
-        .then(response => {
-            console.log('Response status:', response.status);
-            return response.json();
-        })
-        .then(data => {
-            console.log('Data received from server:', data);
-            document.getElementById('searchResults').innerHTML = '';
-            data.forEach(function(user) {
-                var userElement = document.createElement('div');
-                userElement.innerHTML = '<div class="user-container">' +
-                    '<div class="avatar-container">' +
-                    '<img class="avatar" src="data:image/jpeg;base64,' + user.image + '" alt="Avatar">' +
-                    '</div>' +
-                    '<div class="username-container">' +
-                    '<p>' + user.login + '</p>' +
-                    '</div>' +
-                    '<div class="button-container">' +
-                    '<button class="add-button" onclick="addFriend(\'' + user.login + '\')">Добавить в друзья</button>' +
-                    '</div>' +
-                    '</div>';
-                document.getElementById('searchResults').appendChild(userElement);
-            });
-        })
-        .catch(error => console.error('Ошибка при выполнении поиска:', error));
-}
-
-    function addFriend(username) {
-        var csrfTokenValue = "${_csrf.token}";
-        fetch('/addFriend', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfTokenValue
-            },
-            body: JSON.stringify({
-                username: username,
-            }),
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Отправлена заявка пользователю ' + username + ' для добавления в друзья!');
-            } else {
-                alert('Не удалось отправить заявку пользователю ' + username + ' для добавления в друзья.');
-            }
-        })
-        .catch(error => console.error('Ошибка при отправке запроса:', error));
-    }
-    function uploadImage(files) {
-    var csrfTokenValue = "${_csrf.token}";
-    var file = files[0];
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('circular-images').src = e.target.result;
-        // Теперь здесь нужно отправить файл на бэкенд
-        var formData = new FormData();
-        formData.append('avatar', file);
-        fetch('/upload-avatar', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': csrfTokenValue
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Аватар успешно обновлен');
-            } else {
-                alert('Ошибка при обновлении аватарки');
-            }
-        })
-        .catch(error => {
-            console.error('Error uploading avatar:', error);
-            alert('Ошибка при обновлении аватарки');
-        });
-    };
-    reader.readAsDataURL(file);
-}
 </script>
 </body>
 </html>

@@ -219,65 +219,32 @@
 </style>
 <html>
 <div class="login-box">
-    <p>Registration</p>
+    <p>Регистрация</p>
     <form action="/tryregistration" method="post" >
         <div class="user-box">
-            <input type="text" id="login" name="login">
-            <label for="login">Login:</label>
+            <input type="text" id="login" name="login" maxlength="255">
+            <label for="login">Логин:</label>
         </div>
         <div class="user-box">
-            <input type="password" id="password" name="password">
-            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" >
+            <label for="password">Пароль:</label>
         </div>
         <div class="user-box">
             <input type="password" id="repeat_password" name="repeat_password">
-            <label for="repeat_password">Repeat Password:</label>
+            <label for="repeat_password">Повторите Пароль:</label>
         </div>
         <div class="user-box">
-            <input type="email" id="email" name="email">
-            <label for="email">Email:</label>
-        </div>
-        <div class="user-box">
-            <input type="phone" id="phone" name="phone">
-            <label for="phone">Phone Number:</label>
+            <input type="email" id="email" name="email" maxlength="255">
+            <label for="email">Почта:</label>
         </div>
         <button class="custom-button" type="submit">
             <span></span>
             <span></span>
             <span></span>
             <span></span>
-            Registrate
+            Зарегистрироваться
         </button>
         <input type="hidden" name ="_csrf" value="${_csrf.token}">
     </form>
 </div>
 </html>
-<!--
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WELCOME</title>
-</head>
-<body>
-<h2>Registration</h2>
-<form action="/registration" method="post">
-    <label for="login.ftlh">Login:</label><br>
-    <input type="text" id="login.ftlh" name="login.ftlh"><br>
-    <label for="password">Password:</label><br>
-    <input type="password" id="password" name="password"><br><br>
-    <label for="repeat_password">Repeat Password:</label><br>
-    <input type="password" id="repeat_password" name="repeat_password"><br><br>
-    <label for="email">Email:</label><br>
-    <input type="email" id="email" name="email"><br><br>
-    <label for="phone">Phone Number:</label><br>
-    <input type="phone" id="phone" name="phone" ><br><br>
-    <input type="hidden" name ="_csrf" value="${_csrf.token}">
-    <input type="submit" value="Registration">
-</form>
-<#if errorMessage??>
-<h2 style="color: red">${errorMessage}</h2>
-</#if>
-</body>
-</html>
--->

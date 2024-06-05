@@ -55,11 +55,11 @@ public class serviceClient
         client.setActive(true);
         client.setPassword(passwordEncoder.encode(client.getPassword()));
         client.getRoles().add(Role.ROLE_USER);
-        if (client.getPassword().equals("") ||client.getMail().equals("") || client.getPhoneNumber().equals("") || client.getLogin().equals(""))
+        if (client.getPassword().equals("") ||client.getMail().equals("") || client.getLogin().equals(""))
         return false;
         else {clientRepository.save(client) ; return true;}
     }
-
+    public Client getClientByEmail (String str) {return clientRepository.findBymail(str);}
     public void saveImage(Client client, MultipartFile avatar) throws IOException {
         Image image;
         if (avatar.getSize() !=0)
@@ -114,6 +114,7 @@ public class serviceClient
     public void deleteClient(Long id) {
         //clients.removeIf(client -> client.getidClient() == id);
     }
+    public void save(Client client){clientRepository.save(client);}
     public boolean isValidEmail(String email){
         return (validateEmail(email));
     }
@@ -122,6 +123,8 @@ public class serviceClient
         Matcher matcher = pattern.matcher(email);
         return matcher.matches();
     }
+    public void deleteById(Long id) {inviteRepository.deleteById(id);}
+    public Optional<Invite> deleteInvite(String from, String to){return inviteRepository.findByFromLoginAndToLogin(from, to);}
     @Transactional
     public void changeStatusInvite(InviteStatus status, String to, String from)
     {
@@ -229,7 +232,7 @@ public class serviceClient
         Matcher matcher = pattern.matcher(password);
         return matcher.matches();
     }
-
+    public List<Client> allClientsForTrip(Integer id){return clientRepository.findAllClientsForTrip(id);}
     public List<Invite> getInvitesByClientId(Long id) {
     List<Invite> inv= inviteRepository.findByTo(clientRepository.findById(id).get());
     List<Invite> invites = new ArrayList<Invite>();

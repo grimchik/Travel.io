@@ -2,9 +2,14 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Hello, ${username}!</title>
+    <title>
+        Hello, ${username}!
+    </title>
     <link rel="shortcut icon" href="/icon.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v3.1.0/mapbox-gl.js"></script>
     <link
 
@@ -18,6 +23,121 @@
             type="text/css"
     />
     <style>
+        .Btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition-duration: 0.3s;
+  box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
+  background-color: rgb(161, 255, 20);
+}
+.bg-rgb-menu {
+  background-color: rgb(161, 255, 20);
+}
+/* plus sign */
+.sign {
+  width: 100%;
+  transition-duration: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sign svg {
+  width: 18px;
+}
+
+.sign svg path {
+  fill: black;
+}
+/* text */
+.text {
+  position: absolute;
+  right: 0%;
+  width: 0%;
+  opacity: 0;
+  color: black;
+  font-size: 1.2em;
+  font-weight: 600;
+  transition-duration: 0.3s;
+}
+/* hover effect on button width */
+.Btn:hover {
+  width: 155px;
+  border-radius: 40px;
+  transition-duration: 0.3s;
+}
+
+.Btn:hover .sign {
+  width: 30%;
+  transition-duration: 0.3s;
+  padding-left: 20px;
+}
+/* hover effect button's text */
+.Btn:hover .text {
+  opacity: 1;
+  width: 70%;
+  transition-duration: 0.3s;
+  padding-right: 10px;
+}
+/* button click effect*/
+.Btn:active {
+  transform: translate(2px, 2px);
+}
+.button2 {
+  font-family: 'Arial', sans-serif;
+  font-size: 15px;
+  width: 220px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  background-color: rgb(161, 255, 20);
+  border-radius: 30px;
+  color: rgb(19, 19, 19);
+  font-weight: 600;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition-duration: .2s;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.116);
+  padding-left: 8px;
+  transition-duration: .5s;
+}
+
+.svgIcon {
+  height: 25px;
+  transition-duration: 1.5s;
+}
+
+.bell2 path {
+  fill: rgb(19, 19, 19);
+}
+
+.button2:hover {
+  background-color: rgb(192, 255, 20);
+  transition-duration: .5s;
+}
+
+.button2:active {
+  transform: scale(0.97);
+  transition-duration: .2s;
+}
+
+.button2:hover .svgIcon {
+  transform: rotate(250deg);
+  transition-duration: 1.5s;
+}
+
+
         /* Стили для модального окна */
 .modal {
     display: none; /* по умолчанию скрыто */
@@ -65,8 +185,8 @@
         }
         #circular-image {
             border-radius: 50%;
-            width: 100px;
-            height: 100px;
+            width: 150px;
+            height: 150px;
         }
 
         #image-container {
@@ -76,9 +196,10 @@
             border-radius: 50%;
         }
         #map {
-          width: 80%;
-          height: 80vh;
-          margin-bottom: 20px;
+          width: 70%;
+          height: 70vh;
+          margin-bottom: 10px;
+          border-radius: 10px;
         }
 
         .button-container {
@@ -86,11 +207,11 @@
           bottom: 20px;
         }
         #profile-form {
-            margin-right: 10px; /* добавьте отступ справа, чтобы разделить кнопки */
+            margin-right: 10px;
         }
         .buttonbell {
-    width: 50px;
-    height: 50px;
+    width: 30px;
+    height: 30px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -149,24 +270,91 @@
 .buttonbell:active {
     transform: scale(0.8);
 }
+        .navbar-brand img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .nav-link {
+            font-family: 'Arial', sans-serif;
+            font-size: 16px;
+            color: black
+        }
+
+        .nav-item + .nav-item {
+            border-left: 2px solid black;
+            padding-left: 15px;
+        }
+
+        .bg-rgb-menu {
+            background-color: rgb(192, 255, 20);
+        }
     </style>
 </head>
 <body>
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-light bg-rgb-menu fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <img src="/LogoWeb.png" alt="" class="d-inline-block align-top">Voyage
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0" style="display: flex; align-items: center;">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/hello">Главная</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/your-travels">Ваши Путешествия</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/friends-list">Список Друзей</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0" style="display: flex; align-items: center;">
+                    <li class="nav-item">
+                        <button id="showRequestsButton" class="buttonbell">
+                            <svg viewBox="0 0 448 512" class="bell"><path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"></path></svg>
+                        </button>
+                    </li>
+                    <li class="nav-item" style="margin-right: auto;">
+                        <form id="profile-form" action="/profile" method="get" style="display: flex; align-items: center;">
+                            <button type="submit" class="btn" style="border: none; background: none; padding: 0; margin: 0;" disabled>
+                                <img id="circular-image" src="data:image/png;base64,${base64Image}" alt="avatar" style="width: 50px; height: 50px;">
+                            </button>
+                            <a class="nav-link" href="/profile">Профиль</a>
+                        </form>
+                    </li>
+                    <li class="nav-item">
+                        <form action="/logout" method="post">
+                            <input type="hidden" name="_csrf" value="${_csrf.token}"/>
+                            <button class="btn" type="submit">
+                                <div class="sign">
+                                    <svg viewBox="0 0 512 512">
+                                        <path d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"></path>
+                                    </svg>
+                                </div>
+                                <div class="text">Logout</div>
+                            </button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
 <div id="map"></div>
 
 <div class="button-container">
     <form action="/newtravel" method="get">
-        <button class="button">
+        <button class="button2">
             <svg viewBox="0 0 512 512" height="1em" xmlns="http://www.w3.org/2000/svg"><path d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zm50.7-186.9L162.4 380.6c-19.4 7.5-38.5-11.6-31-31l55.5-144.3c3.3-8.5 9.9-15.1 18.4-18.4l144.3-55.5c19.4-7.5 38.5 11.6 31 31L325.1 306.7c-3.2 8.5-9.9 15.1-18.4 18.4zM288 256a32 32 0 1 0 -64 0 32 32 0 1 0 64 0z"/></svg>
             Начать новое путешествие!
         </button>
     </form>
-    <form action="/logout" method="post">
-        <input type="hidden" name="_csrf" value="${_csrf.token}"/>
-        <button type="submit" style="text-align: center; width: 100%" >
-            Выйти из аккаунта
-        </button>
-    </form>
+
 </div>
 <div id="requestsModal" class="modal">
     <div class="modal-content">
@@ -174,22 +362,16 @@
         <div id="requestsList"></div>
     </div>
 </div>
-<div id="image-container">
-    <form id="profile-form" action="/profile" method="get">
-        <button type="submit" style="border: none; background: none; padding: 0; margin: 0;">
-            <img id="circular-image" src="data:image/png;base64,${base64Image}" alt="avatar">
-        </button>
-    </form>
-    <button id="showRequestsButton" class="buttonbell">
-        <svg viewBox="0 0 448 512" class="bell"><path d="M224 0c-17.7 0-32 14.3-32 32V49.9C119.5 61.4 64 124.2 64 200v33.4c0 45.4-15.5 89.5-43.8 124.9L5.3 377c-5.8 7.2-6.9 17.1-2.9 25.4S14.8 416 24 416H424c9.2 0 17.6-5.3 21.6-13.6s2.9-18.2-2.9-25.4l-14.9-18.6C399.5 322.9 384 278.8 384 233.4V200c0-75.8-55.5-138.6-128-150.1V32c0-17.7-14.3-32-32-32zm0 96h8c57.4 0 104 46.6 104 104v33.4c0 47.9 13.9 94.6 39.7 134.6H72.3C98.1 328 112 281.3 112 233.4V200c0-57.4 46.6-104 104-104h8zm64 352H224 160c0 17 6.7 33.3 18.7 45.3s28.3 18.7 45.3 18.7s33.3-6.7 45.3-18.7s18.7-28.3 18.7-45.3z"></path></svg>
-    </button>
-</div>
+
 <script>
     var username = "UserNickname";
     var titleElement = document.getElementById("username");
         <#if longitudeValue?has_content && latitudeValue?has_content>
         var longitude = ${longitudeValue};
         var latitude = ${latitudeValue};
+        markerBase = new mapboxgl.Marker({ color: 'rgb(161, 255, 20)' })
+            .setLngLat(longitude,latitude)
+            .addTo(map);
         <#else>
         var longitude = 27.5667; // Долгота Минска
         var latitude = 53.9; // Широта Минска
@@ -239,15 +421,15 @@
     });*/
 
     // Button click event to reset map to the initial location
-    document.querySelector('.button').addEventListener('click', function() {
+    document.querySelector('.button2').addEventListener('click', function() {
         map.flyTo({
             center: [longitude, latitude],
             zoom: 10
         });
     });
-    // Добавляем обработчик события на клик по кнопке
-// Добавляем обработчик события на клик по кнопке
-document.getElementById('showRequestsButton').addEventListener('click', function() {
+
+document.querySelector('.buttonbell').addEventListener('click', function() {
+    console.log("CHECK");
     fetchFriendInvitations();
 });
 

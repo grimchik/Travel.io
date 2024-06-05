@@ -223,7 +223,7 @@
     <form action="/try-login" method="post">
         <div class="user-box">
             <input type="text" id="username" name="username">
-            <label for="username">Login:</label>
+            <label for="username">Логин:</label>
         </div>
         <div class="user-box">
             <input type="password" id="password" name="password">
@@ -234,11 +234,11 @@
             <span></span>
             <span></span>
             <span></span>
-            Submit
+            Отправить
         </button>
         <input type="hidden" name ="_csrf" value="${_csrf.token}">
     </form>
-    <p>Don't have an account? <a href="registration" class="a2">Sign up!</a></p>
+    <p>Нет аккаунта? <a href="registration" class="a2">Зарегистрируйтесь!</a></p>
 </div>
 </html>
 <!--

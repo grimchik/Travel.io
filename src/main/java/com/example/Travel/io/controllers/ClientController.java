@@ -22,6 +22,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.servlet.view.RedirectView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -31,6 +32,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.*;
+import java.security.Principal;
 import java.text.AttributedString;
 import java.util.ArrayList;
 
@@ -50,6 +52,7 @@ public class ClientController {
     private final HttpServletRequest request;
     private final AuthenticationManager authenticationManager;
     private final serviceClient serviceClient;
+    private final serviceTrip serviceTrip;
     @GetMapping("/")
     public String getmain()
     {
@@ -61,6 +64,7 @@ public class ClientController {
         return ResponseEntity.ok().body("Avatar uploaded successfully");
     }
     @GetMapping("/get_user_friends")
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ClientInfo>> getUserFriends(@RequestParam("userLogin") String userLogin) {
         List<ClientInfo> friends = new ArrayList<>();
         List<Client> clients = serviceClient.findFriendsByClientId(serviceClient.getClientByLogin(userLogin).getIdClient());
@@ -69,19 +73,56 @@ public class ClientController {
             ClientInfo clientInfo = new ClientInfo(clnt.getLogin(),Base64.getEncoder().encodeToString(clnt.getImage().getImage()));
             friends.add(clientInfo);
         }
-        System.out.println(clients.size());
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(friends);
+    }
+    @GetMapping("/get_user_travels")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TravelInfo>> getUserTravels(@RequestParam("userLogin") String userLogin) {
+        List<TravelInfo> travels = new ArrayList<>();
+        List<Trip> trips = serviceTrip.tripWithIdClient(serviceClient.getClientByLogin(userLogin).getIdClient());
+        for (Trip trip: trips)
+        {
+            TravelInfo travelInfo = new TravelInfo(trip.getName());
+            travels.add(travelInfo);
+        }
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(travels);
     }
     @GetMapping("/profile/{username}")
     @PreAuthorize("isAuthenticated()")
     public String userPage(@PathVariable String username, Model model)
     {
-        Client client1 = serviceClient.getClientByLogin(username);
-        var base64Image2 = client1.getImage().getImage();
-        model.addAttribute("base64Image", Base64.getEncoder().encodeToString(base64Image2));
-        return "userPage";
+        if (serviceClient.getClientByLogin(username) != null) {
+            Client client1 = serviceClient.getClientByLogin(username);
+            var base64Image2 = client1.getImage().getImage();
+            model.addAttribute("base64Image", Base64.getEncoder().encodeToString(base64Image2));
+            if (username.equals(client.getLogin()))
+            {
+                return "profile";
+            }
+            List<Trip> travels = serviceTrip.tripWithIdClient(client1.getIdClient());
+            List<TripInformation> tripInfo = new ArrayList<>();
+            for (Trip trip: travels)
+            {
+                TripInformation tripIn = new TripInformation();
+                tripIn.setAdministrator(trip.getAdministrator().getLogin());
+                tripIn.setName(trip.getName());
+                tripIn.setCount(serviceClient.allClientsForTrip(trip.getIdTrip()).size());
+                tripInfo.add(tripIn);
+            }
+            model.addAttribute("travels", tripInfo);
+            List<ClientInfo> friends = new ArrayList<>();
+            List<Client> clients = serviceClient.findFriendsByClientId(client1.getIdClient());
+            for (Client clnt: clients)
+            {
+                ClientInfo clientInfo = new ClientInfo(clnt.getLogin(),Base64.getEncoder().encodeToString(clnt.getImage().getImage()));
+                friends.add(clientInfo);
+            }
+            model.addAttribute("friends", friends);
+            return "userPage";
+        }
+        System.out.println("CHECK");
+        return "error";
     }
-
     @GetMapping("/get_friends")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<List<ClientInfo>> getFriends() {
@@ -92,21 +133,35 @@ public class ClientController {
             ClientInfo clientInfo = new ClientInfo(clnt.getLogin(),Base64.getEncoder().encodeToString(clnt.getImage().getImage()));
             friends.add(clientInfo);
         }
-        System.out.println(clients.size());
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(friends);
+    }
+    @GetMapping("/get_travels")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<List<TravelInfo>> getTravels() {
+        List<TravelInfo> travels = new ArrayList<>();
+        List<Trip> travel = serviceTrip.tripWithIdClient(client.getIdClient());
+        for (Trip clnt: travel)
+        {
+            TravelInfo clientInfo = new TravelInfo(clnt.getName());
+            travels.add(clientInfo);
+        }
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(travels);
     }
     @GetMapping("/search")
     @ResponseBody
     public ResponseEntity<List<ClientInfo>> searchUsers(@RequestParam("query") String query) {
         List<Client> users = serviceClient.findByLoginContaining(query);
         List<ClientInfo> userInfoList = new ArrayList<>();
+        var client1 = ClientController.getClient();
         for (Client user : users) {
-            ClientInfo userInfo = new ClientInfo();
-            userInfo.setLogin(user.getLogin());
-            byte[] imageData = user.getImage().getImage();
-            userInfo.setImage(Base64.getEncoder().encodeToString(imageData));
-            if (!user.getLogin().equals(client.getLogin()))
-            userInfoList.add(userInfo);
+            if (!serviceClient.findFriendsByClientId(client1.getIdClient()).contains(user)) {
+                ClientInfo userInfo = new ClientInfo();
+                userInfo.setLogin(user.getLogin());
+                byte[] imageData = user.getImage().getImage();
+                userInfo.setImage(Base64.getEncoder().encodeToString(imageData));
+                if (!user.getLogin().equals(client.getLogin()))
+                    userInfoList.add(userInfo);
+            }
         }
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -159,25 +214,33 @@ public class ClientController {
         if (success) {
             return ResponseEntity.ok("User added to friends successfully!");
         } else {
-            return ResponseEntity.ok("User doesn't added to friends successfully!");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User doesn't added to friends successfully!");
         }
     }
 
 
     @GetMapping("/hello")
     @PreAuthorize("isAuthenticated()")
-    public String hello(Model model)
+    public String hello(Model model, Principal principal)
     {
-        String username = client.getLogin();
-        model.addAttribute("username", username);
-        Long idValue = client.getIdClient();
-        Long id = idValue;
-        var image = serviceClient.findImage(id);
-        if (image != null) {
-            byte[] imageData = image.getImage();
-            base64Image = Base64.getEncoder().encodeToString(imageData);
-            model.addAttribute("base64Image", base64Image);
+        if (principal != null) {
+            model.addAttribute("isAuthenticated", true);
+            model.addAttribute("username", principal.getName());
+            String username = client.getLogin();
+            model.addAttribute("username", username);
+            Long idValue = client.getIdClient();
+            Long id = idValue;
+            var image = serviceClient.findImage(id);
+            if (image != null) {
+                byte[] imageData = image.getImage();
+                base64Image = Base64.getEncoder().encodeToString(imageData);
+                model.addAttribute("base64Image", base64Image);
+            }
         }
+        else {
+            model.addAttribute("isAuthenticated", false);
+        }
+
         String ipAddress ="";
         String urlString = "http://checkip.amazonaws.com/";
         try {
@@ -218,10 +281,9 @@ public class ClientController {
                                @RequestParam String password,
                                @RequestParam String repeat_password,
                                @RequestParam String email,
-                               @RequestParam String phone,
                                Model model) throws IOException {
         if (repeat_password.equals(password)&& serviceClient.isValidPassword(password) && serviceClient.isValidEmail(email)) {
-            Client client = new Client(0, login, password, email, phone, true);
+            Client client = new Client(0, login, password, email, true);
             client.setDefaultAvatar();
             if (!serviceClient.createClient(client)) {
                 model.addAttribute("errorMessage", "User with this login are exist!");
@@ -231,11 +293,79 @@ public class ClientController {
         }
         return "registration";
     }
+    @GetMapping("/your-travels")
+    @PreAuthorize("isAuthenticated()")
+    public String yourTravels(Model model) {
+        List<Trip> travels = serviceTrip.tripWithIdClient(client.getIdClient());
+        List<TripInformation> tripInfo = new ArrayList<>();
+        for (Trip trip: travels)
+        {
+            TripInformation tripIn = new TripInformation();
+            tripIn.setAdministrator(trip.getAdministrator().getLogin());
+            tripIn.setName(trip.getName());
+            tripIn.setCount(serviceClient.allClientsForTrip(trip.getIdTrip()).size());
+            tripInfo.add(tripIn);
+        }
+        model.addAttribute("travels", tripInfo);
+        model.addAttribute("base64Image", base64Image);
+        return "your-travels";
+    }
+
+    @GetMapping("/delete-travel")
+    @PreAuthorize("isAuthenticated()")
+    @Transactional
+    public String deleteTravel(@RequestParam("travelId") String name) {
+        List<Client> clients = serviceClient.allClientsForTrip(serviceTrip.findByName(name).getIdTrip());
+        for (Client client: clients)
+        {
+            serviceTrip.deleteTrip(client.getIdClient(),serviceTrip.findByName(name).getIdTrip());
+        }
+        serviceTrip.deleteByName(name);
+        return "redirect:/your-travels";
+    }
+
+    @GetMapping("/friends-list")
+    @PreAuthorize("isAuthenticated()")
+    public String friendsList(Model model) {
+        model.addAttribute("base64Image", base64Image);
+        List<ClientInfo> friends = new ArrayList<>();
+        List<Client> clients = serviceClient.findFriendsByClientId(client.getIdClient());
+        for (Client clnt: clients)
+        {
+            ClientInfo clientInfo = new ClientInfo(clnt.getLogin(),Base64.getEncoder().encodeToString(clnt.getImage().getImage()));
+            friends.add(clientInfo);
+        }
+        model.addAttribute("friends", friends);
+        return "friends-list";
+    }
+    @GetMapping("/delete-friend")
+    @PreAuthorize("isAuthenticated()")
+    @Transactional
+    public String deleteFriend(@RequestParam("friendLogin") String name) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        Client currentUser = serviceClient.getClientByLogin(currentUsername);
+        Client friend = serviceClient.getClientByLogin(name);
+        currentUser.getFriends().remove(friend);
+        if (serviceClient.deleteInvite(name,currentUsername).isPresent())
+        {
+            serviceClient.deleteById(serviceClient.deleteInvite(name,currentUsername).get().getId());
+        }
+        else
+        {
+            serviceClient.deleteById(serviceClient.deleteInvite(currentUsername,name).get().getId());
+        }
+        friend.getFriends().remove(currentUser);
+        serviceClient.save(currentUser);
+        serviceClient.save(friend);
+        return "redirect:/friends-list";
+    }
     @GetMapping("/newtravel")
     @PreAuthorize("isAuthenticated()")
     public String newTravel(Model model) {
         model.addAttribute("longitude", longitude );
         model.addAttribute("latitude", latitude);
+        model.addAttribute("base64Image", base64Image);
         return "newtravel";
     }
     @GetMapping("/profile")

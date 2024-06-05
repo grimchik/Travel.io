@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 public class serviceTrip {
@@ -26,11 +27,13 @@ public class serviceTrip {
         this.subTripRepository= subTripRepository;
         this.serviceClient=serviceClient;
     }
+
+    public void deleteTrip(Long idClient, int idTrip ) {clientRepository.removeTripFromClient(idClient,idTrip);}
     public void saveTrip(Trip trip)
     {
         tripRepository.save(trip);
     }
-
+    public void deleteByName(String str) {tripRepository.deleteByName(str);}
     public Trip findByName(String name) {
         return tripRepository.findByName(name);
     }
@@ -38,9 +41,22 @@ public class serviceTrip {
     {
         subTripRepository.deleteByTrip(trip);
     }
+    public List<Trip> tripWithIdClient(Long id)
+    {
+        return tripRepository.findAllByClientId(id);
+    }
+    public List<SubTrip> subTrips(Trip trip)
+    {
+        return subTripRepository.findByTrip(trip);
+    }
+    public void updateTrip(Integer id, String name)
+    {tripRepository.updateTripNameById(id,name);}
 
     public boolean addFriendToTravel(Trip trip, String username)
     {
+        if (serviceClient.allClientsForTrip(Integer.valueOf(trip.getIdTrip())).size() >= 8) {
+            return false;
+        }
         Client client = serviceClient.getClientByLogin(username);
         trip.getClients().add(client);
         saveTrip(trip);

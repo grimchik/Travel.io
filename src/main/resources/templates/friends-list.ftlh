@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <title>
-        Профиль!
+        Список Друзей!
     </title>
     <link rel="shortcut icon" href="/icon.jpg">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -97,7 +97,7 @@
   transform: translate(2px, 2px);
 }
 .button2 {
-  width: 160px;
+  width: 220px;
   height: 40px;
   display: flex;
   align-items: center;
@@ -191,14 +191,12 @@
             width: 150px;
             height: 150px;
         }
+
         #image-container {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        #circular-images {
+            position: absolute;
+            top: 20px;
+            right: 20px;
             border-radius: 50%;
-            width: 100px;
-            height: 100px;
         }
         #map {
           width: 70%;
@@ -291,9 +289,6 @@
             padding-left: 15px; /* Отступ слева, чтобы граница не касалась текста */
         }
 
-        #file-input {
-            display: none;
-        }
         .bg-rgb-menu {
             background-color: rgb(192, 255, 20);
         }
@@ -353,14 +348,39 @@
         </div>
     </nav>
 </div>
-
-
-<div id="image-container">
-    <img id="circular-images" src="data:image/png;base64,${base64Image}" alt="avatar">
-</div>
-<input type="file" id="file-input" accept="image/*" onchange="uploadImage(this.files)">
-<button class="button2" onclick="document.getElementById('file-input').click();">Изменить Аватарку
+<button class="button2" onclick="openSearchModal()">
+    Добавить друга!
 </button>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6">
+            <h2>Список Друзей</h2>
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>Аватарка</th>
+                    <th>Логин</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <#list friends as friend>
+                <tr>
+                    <td><img class="avatar" src="data:image/jpeg;base64,${friend.image}" alt="Avatar"></td>
+                    <td><a href="/profile/${friend.login}">${friend.login}</a></td>
+                    <td>
+                        <form action="/delete-friend" method="get">
+                            <input type="hidden" name="friendLogin" value="${friend.login}" />
+                            <button type="submit" class="btn btn-danger">Удалить Из Друзей</button>
+                        </form>
+                    </td>
+                </tr>
+                </#list>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
 <div id="requestsModal" class="modal">
     <div class="modal-content">
         <span class="close">&times;</span>
@@ -372,27 +392,9 @@
         <span class="close" onclick="closeSearchModal()">&times;</span>
         <form id="searchForm" onsubmit="searchUser(); return false;">
             <input type="text" id="searchInput" placeholder="Введите логин пользователя">
-            <button class="button2" type="submit">Искать</button>
+            <button type="submit">Искать</button>
         </form>
         <div id="searchResults"></div>
-    </div>
-</div>
-<div class="container">
-    <div class="row">
-        <div class="col-md-6">
-            <h2>Список Достижений</h2>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>Аватарка</th>
-                    <th>Название</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                </tbody>
-            </table>
-        </div>
     </div>
 </div>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -568,36 +570,6 @@
         })
         .catch(error => console.error('Ошибка при отправке запроса:', error));
     }
-    function uploadImage(files) {
-    var csrfTokenValue = "${_csrf.token}";
-    var file = files[0];
-    var reader = new FileReader();
-    reader.onload = function(e) {
-        document.getElementById('circular-images').src = e.target.result;
-        // Теперь здесь нужно отправить файл на бэкенд
-        var formData = new FormData();
-        formData.append('avatar', file);
-        fetch('/upload-avatar', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': csrfTokenValue
-            }
-        })
-        .then(response => {
-            if (response.ok) {
-                alert('Аватар успешно обновлен');
-            } else {
-                alert('Ошибка при обновлении аватарки');
-            }
-        })
-        .catch(error => {
-            console.error('Error uploading avatar:', error);
-            alert('Ошибка при обновлении аватарки');
-        });
-    };
-    reader.readAsDataURL(file);
-}
 </script>
 </body>
 </html>

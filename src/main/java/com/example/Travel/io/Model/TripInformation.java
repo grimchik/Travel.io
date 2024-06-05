@@ -4,26 +4,22 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
-public class TravelRequest {
+public class TripInformation {
     @Getter
     @Setter
-    private List<String> names;
+    private String administrator;
     @Getter
     @Setter
-    private List<Coordinate> markers;
+    private String name;
     @Getter
     @Setter
-    private String transportType;
+    private int count;
     @Getter
     @Setter
-    private String type;
-    @Getter
-    @Setter
-    private String status;
+    private String transport;
 }
